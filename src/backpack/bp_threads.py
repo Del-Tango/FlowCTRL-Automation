@@ -1,7 +1,10 @@
+import logging
+
 from threading import Thread
 
+log = logging.getLogger('FlowCTRL')
 
-# TODO - Remove from backpack
+# THREADS
 
 
 # TODO - Under construction, building...

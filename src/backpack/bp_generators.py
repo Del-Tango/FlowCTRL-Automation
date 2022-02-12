@@ -2,7 +2,7 @@ import string
 import random
 import logging
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('FlowCTRL')
 
 # GENERATORS
 

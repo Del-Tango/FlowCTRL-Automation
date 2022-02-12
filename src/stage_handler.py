@@ -7,7 +7,7 @@ from .abstract_handler import Handler
 from .action_handler import ActionHandler as Action
 
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('FlowCTRL')
 
 
 class StageHandler(Handler):
@@ -37,16 +37,9 @@ class StageHandler(Handler):
         failures, skip_to_action = 0, None if not skip_to else skip_to[1]
         for action_record_dict in actions_list:
             if skip_to_action and action_record_dict.get('name') == skip_to_action:
-                skip_to_action = None
+                skip_to_action, skip_to = None, None
             elif skip_to_action and action_record_dict.get('name') != skip_to_action:
                 continue
-            if not self.fetch_state() or self.fetch_state('action') \
-                    not in ('started', 'resumed'):
-                stdout_msg(
-                    'Terminate signal received at action ({})'.format(
-                    action_record_dict.get('name', 'Unknown')), warn=True
-                )
-                return False
             if not self.action_handler.set_instruction(action_record_dict):
                 failures += 1
                 stdout_msg(
@@ -56,7 +49,14 @@ class StageHandler(Handler):
                 continue
             self.update_state_record(3, action_record_dict.get('name', 'Unknown'))
             action = self.action_handler.start()
-            if not action:
+            if not self.fetch_state() or self.fetch_state('action') \
+                    not in ('started', 'resumed'):
+                stdout_msg(
+                    'Terminate signal received during action ({})'.format(
+                    action_record_dict.get('name', 'Unknown')), warn=True
+                )
+                return
+            elif not action:
                 failures += 1
         if failures:
             stdout_msg(
@@ -67,6 +67,7 @@ class StageHandler(Handler):
 
     # ACTIONS
 
+#   @pysnooper.snoop()
     def start(self, skip_to=None):
         log.debug('')
         failures, instruction = 0, self.fetch_instruction()
@@ -76,22 +77,30 @@ class StageHandler(Handler):
                 .format(instruction)
             )
             return False
+        skip2stage = None if not skip_to else skip_to[0]
         for stage_label in instruction:
-            if not self.fetch_state() or self.fetch_state('action') \
-                    not in ('started', 'resumed'):
-                stdout_msg(
-                    'Terminate signal received before stage ({})'.format(stage_label),
-                    warn=True
-                )
-                return
             stdout_msg(
                 'Processing procedure stage... ({})'.format(stage_label),
                 info=True
             )
+            if skip2stage and stage_label == skip2stage:
+                skip2stage = None
+            elif skip2stage and stage_label != skip2stage:
+                continue
             process = self.process_stage_actions(
-                instruction.get(stage_label), skip_to=skip_to
+                instruction.get(stage_label),
+                skip_to=None if not skip_to else skip_to
             )
-            if not process:
+            if not self.fetch_state() or self.fetch_state('action') \
+                    not in ('started', 'resumed'):
+                stdout_msg(
+                    'Terminate signal received during stage ({})'
+                    .format(stage_label), warn=True
+                )
+                return
+            if skip_to:
+                skip_to = None
+            elif not process:
                 failures += 1
                 continue
             stdout_msg(

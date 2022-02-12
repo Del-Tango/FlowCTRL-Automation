@@ -9,7 +9,7 @@ from .abstract_handler import Handler
 from .stage_handler import StageHandler as Stage
 from .validator import Validator
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('FlowCTRL')
 
 
 class ProcedureHandler(Handler):
@@ -45,7 +45,7 @@ class ProcedureHandler(Handler):
         failures, skip_to_stage = 0, None if not skip_to else skip_to[0]
         for stage_id in stages_dict:
             if skip_to_stage and stage_id == skip_to_stage:
-                skip_to_stage, skip_to = None, None
+                skip_to_stage = None
             elif skip_to_stage and stage_id != skip_to_stage:
                 continue
             if not self.stage_handler.set_instruction({stage_id: stages_dict[stage_id]}):
@@ -56,12 +56,13 @@ class ProcedureHandler(Handler):
                     warn=True
                 )
                 continue
+            self.update_state_record(2, stage_id)
             stage = self.stage_handler.start(skip_to=skip_to)
+            skip_to = None
             if not stage and stage == False:
                 failures += 1
             elif not stage and stage == None:
                 return
-            self.update_state_record(2, stage_id)
         if failures:
             stdout_msg(
                 'Failures detected when processing ({}) sketch stages! ({})'

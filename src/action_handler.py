@@ -12,7 +12,7 @@ from .backpack.bp_checkers import check_file_exists
 from .backpack.bp_threads import ThreadWithReturnValue
 from .abstract_handler import Handler
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('FlowCTRL')
 
 
 class ActionHandler(Handler):
@@ -43,12 +43,13 @@ class ActionHandler(Handler):
 
     # GENERAL
 
-    def detached_shell(self, command, return_values):
+#   @pysnooper.snoop()
+    def detached_shell(self, command, return_values, user=None):
         '''
         [ NOTE ]: Wrapper for backpack.shell_cmd() that runs in it's own thread
         '''
         log.debug('')
-        stdout, stderr, exit_code = shell(command)
+        stdout, stderr, exit_code = shell(command, user=user)
         for item in (stdout, stderr, exit_code):
             return_values.append(item)
         return return_values
@@ -131,16 +132,23 @@ class ActionHandler(Handler):
         return_values, timeout = [], self.convert_action_time_to_seconds(
             action_dict.get('timeout')
         )
-        thread = Thread(target=self.detached_shell, args=(command, return_values))
+        thread = Thread(
+            target=self.detached_shell,
+            args=(command, return_values, action_dict.get('user'))
+        )
         start_time = timer()
         thread.start()
         timeout = self.handle_shell_cmd_timeout(start_time, timeout, return_values)
         if timeout:
-            return False
+            stdout_msg(
+                'Command timed out! ({})'.format(action_dict.get('timeout')),
+                nok=True
+            )
+            return None, None, 1
         thread.join()
         if not return_values:
             stdout_msg('Could not fetch process return values!', err=True)
-            return False
+            return None, None, 2
         exit_code = return_values[2]
         if exit_code != 0:
             stdout_msg(return_values[1], err=True)
@@ -176,9 +184,13 @@ class ActionHandler(Handler):
         if main_cmd and action_dict['on-ok-cmd']:
             on_ok = self.handle_on_ok_cmd(action_dict)
             if not on_ok: failures += 1
-        if not main_cmd and action_dict['on-nok-cmd']:
-            on_nok = self.handle_on_nok_cmd(action_dict)
-            if not on_nok: failures += 1
+        if not main_cmd:
+            if action_dict['on-nok-cmd']:
+                on_nok = self.handle_on_nok_cmd(action_dict)
+                if not on_nok: failures += 1
+            if action_dict['fatal-nok']:
+                stdout_msg('Fatal! Terminating session.')
+                return
         if action_dict.get('teardown'):
             teardown = self.handle_teardown_cmd(action_dict)
             if not teardown: failures += 1

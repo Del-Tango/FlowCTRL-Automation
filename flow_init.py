@@ -16,14 +16,14 @@ from src.backpack.bp_convertors import json2dict
 from src.backpack.bp_general import write2file, clear_screen, stdout_msg
 from src.backpack.bp_shell import shell_cmd as shell
 
-log = logging.getLogger(__name__)
-
 CONFIG_FILE_PATH = os.path.dirname(os.path.realpath(__file__)) \
     + '/conf/flow-ctrl.conf.json'
 CONFIG = json2dict(CONFIG_FILE_PATH)
 PROCEDURE_HANDLER = Procedure()
 PROCEDURE_SKETCH_FILES = list()
 ACTION=''      # start, stop, pause, purge, resume
+log = logging.getLogger(CONFIG['log-name'])
+
 
 # GENERAL
 
@@ -42,6 +42,7 @@ def reload_config():
     log.debug('')
     global CONFIG
     CONFIG = json2dict(CONFIG_FILE_PATH)
+    CONFIG['project-dir'] = os.path.dirname(os.path.realpath(__file__))
     return CONFIG
 
 # FORMATTERS
@@ -222,14 +223,13 @@ def create_command_line_parser():
         {
             "name"         : "Action ID",
             "time"         : "5(s|m|h|d) usual operation time aproximation",
+            "timeout"      : "10(s|m|h|d) operation time allowed"
             "cmd"          : "(Shell CMD1 || Shell CMD 2) && Shell CMD3",
-            "user"         : "system-user-to-run-as",
-            "pass"         : "user-password",
             "setup-cmd"    : "Shell CMD to execute before main (cmd)",
             "teardown-cmd" : "Shell CMD to execute after main (cmd)",
-            "on-ok"        : "Shell CMD to execute if main (cmd) returned 0",
-            "on-nok"       : "Shell CMD to execute if main (cmd) did not return 0'",
-            "timeout"      : "10(s|m|h|d) operation time allowed."
+            "on-ok-cmd"    : "Shell CMD to execute if main (cmd) returned 0",
+            "on-nok-cmd"   : "Shell CMD to execute if main (cmd) did not return 0'",
+            "fatal-nok"    : (true | false) Terminate session after on-nok-cmd,
         }
     ]
 }'''

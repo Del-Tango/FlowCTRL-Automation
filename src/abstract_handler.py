@@ -10,7 +10,7 @@ from .backpack.bp_shell import shell_cmd as shell
 from .backpack.bp_checkers import check_file_exists
 from .validator import Validator
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('FlowCTRL')
 
 
 class Handler(ABC):

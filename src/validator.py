@@ -1,7 +1,7 @@
 import logging
 import pysnooper
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('FlowCTRL')
 
 
 class Validator():

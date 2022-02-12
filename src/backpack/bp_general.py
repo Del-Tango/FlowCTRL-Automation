@@ -3,7 +3,7 @@ import logging
 
 from .bp_shell import shell_cmd as shell
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('FlowCTRL')
 
 # GENERAL
 
@@ -25,7 +25,7 @@ def write2file(*args, file_path=str(), mode='w', **kwargs):
         except UnicodeError as e:
             log.error(e)
             return False
-    log.debug('Wrote to file ({}):\n{}'. format(file_path, content))
+    log.debug('Wrote to file ({}):\n\n{}'. format(file_path, content))
     return True
 
 

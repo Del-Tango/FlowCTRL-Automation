@@ -2,7 +2,7 @@ import logging
 
 from os import path, makedirs, mkfifo
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('FlowCTRL')
 
 # ENSURANCE
 

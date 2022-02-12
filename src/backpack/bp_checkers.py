@@ -2,7 +2,7 @@ import os
 import stat
 import logging
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('FlowCTRL')
 
 # CHECKERS
 
