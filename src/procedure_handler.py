@@ -2,10 +2,11 @@ import logging
 import os
 import pysnooper
 
+from .backpack.bp_shell import shell_cmd as shell
+from .backpack.bp_checkers import check_file_exists
+from .backpack.bp_general import write2file, clear_screen, stdout_msg
 from .abstract_handler import Handler
 from .stage_handler import StageHandler as Stage
-from .backpack.bp_shell import shell_cmd as shell
-from .backpack.bp_general import write2file, clear_screen, stdout_msg
 from .validator import Validator
 
 log = logging.getLogger(__name__)
@@ -39,10 +40,14 @@ class ProcedureHandler(Handler):
     # PROCESSORS
 
 #   @pysnooper.snoop()
-    def process_sketch_stages(self, stages_dict):
+    def process_sketch_stages(self, stages_dict, skip_to=None):
         log.debug('')
-        failures = 0
+        failures, skip_to_stage = 0, None if not skip_to else skip_to[0]
         for stage_id in stages_dict:
+            if skip_to_stage and stage_id == skip_to_stage:
+                skip_to_stage, skip_to = None, None
+            elif skip_to_stage and stage_id != skip_to_stage:
+                continue
             if not self.stage_handler.set_instruction({stage_id: stages_dict[stage_id]}):
                 failures += 1
                 stdout_msg(
@@ -51,11 +56,12 @@ class ProcedureHandler(Handler):
                     warn=True
                 )
                 continue
-            stage = self.stage_handler.start()
+            stage = self.stage_handler.start(skip_to=skip_to)
             if not stage and stage == False:
                 failures += 1
             elif not stage and stage == None:
                 return
+            self.update_state_record(2, stage_id)
         if failures:
             stdout_msg(
                 'Failures detected when processing ({}) sketch stages! ({})'
@@ -65,32 +71,75 @@ class ProcedureHandler(Handler):
 
     # ACTIONS
 
-    # TODO
     def stop(self):
-        log.debug('WARNING: Under construction, building...')
-        # Check state running and previous action in (start, resume)
-        # if running, remove action anchor file - this instructs action handler to
-        # stop
+        log.debug('')
         if not self.validator.check_state(
                 self.fetch_state(), self.fetch_state('action'), 'stop'):
             stdout_msg('Invalid state for action stop!', warn=True)
             stdout_msg('To force action execute with --purge beforehand.', info=True)
             return False
-        self.set_state(True, 'stopped')
+        state_details = []
+        if check_file_exists(self.state_file):
+            with open(self.state_file, 'r') as fl:
+                state_details = [line.strip('\n') for line in fl.readlines()]
+        failures, state = 0, self.set_state(False, 'stopped')
+        if not state:
+            failures += 1
+            stdout_msg(
+                'Could not stop running session! ({})'.format(state_details), nok=True
+            )
+        else:
+            stdout_msg('Session terminated! ({})'.format(state_details), ok=True)
+        if failures:
+            stdout_msg(
+                'Failures detected when processing ({}) sketch stages! ({})'
+                .format(len(stages_dict.keys()), failures), warn=True
+            )
+        return False if failures else True
+
     def cont(self):
-        log.debug('WARNING: Under construction, building...')
-        # Check state not running and previous action paused
-        # If paused check sketch file path
-        # If sketch path valid fetch stage
-        # If stage valid fetch action
-        # Execute procedure handler - instruct to jump to stage/action
+        log.debug('')
         if not self.validator.check_state(
                 self.fetch_state(), self.fetch_state('action'), 'resume'):
             stdout_msg('Invalid state for action resume!', warn=True)
             stdout_msg('To force action execute with --purge beforehand.', info=True)
             return False
-        self.set_state(True, 'resumed')
 
+        failures, state = 0, self.set_state(True, 'resumed')
+        with open(self.state_file, 'r') as fl:
+            state_details = [line.strip('\n') for line in fl.readlines()]
+        if not state:
+            failures += 1
+            stdout_msg(
+                'Could not resume session! ({})'.format(state_details), nok=True
+            )
+        else:
+            segmented_record = state_details[0].split(',')
+            previous_action, sketch_file_path = segmented_record[0], segmented_record[1]
+            stage_id, action_id = segmented_record[2], segmented_record[3]
+            reload_sketch = self.load(sketch_file_path)
+            if not reload_sketch:
+                stdout_msg(
+                    'Could not reload sketch file from previous session! ({})'
+                    .format(sketch_file_path), err=True
+                )
+                failures += 1
+            else:
+                with open(self.state_file, 'r') as fl:
+                    state_details = [line.strip('\n') for line in fl.readlines()]
+                stdout_msg('Session resumed! ({})'.format(state_details), ok=True)
+
+                process = self.process_sketch_stages(
+                    self.fetch_instruction(), skip_to=[stage_id, action_id]
+                )
+        if failures:
+            stdout_msg(
+                'Failures detected when reviving paused session! ({})'
+                .format(failures), warn=True
+            )
+        return False if failures else True
+
+#   @pysnooper.snoop()
     def pause(self):
         log.debug('')
         if not self.validator.check_state(
@@ -99,11 +148,15 @@ class ProcedureHandler(Handler):
             stdout_msg('To force action execute with --purge beforehand.', info=True)
             return False
         failures, state = 0, self.set_state(True, 'paused')
+        with open(self.state_file, 'r') as fl:
+            state_details = [line.strip('\n') for line in fl.readlines()]
         if not state:
             failures += 1
-        pause = self.stage_handler.pause()
-        if not pause:
-            failures += 1
+            stdout_msg(
+                'Could not pause session! ({})'.format(state_details), nok=True
+            )
+        else:
+            stdout_msg('Session on hold! ({})'.format(state_details), ok=True)
         if failures:
             stdout_msg(
                 'Failures detected when processing ({}) sketch stages! ({})'
@@ -121,15 +174,14 @@ class ProcedureHandler(Handler):
             return False
         self.set_state(True, 'started')
         process = self.process_sketch_stages(self.fetch_instruction())
+        if process is None:
+            return
         return False if not process else True
 
 
     def purge(self):
         log.debug('')
-        failures, stage_purge = 0, self.stage_handler.purge()
-        if not stage_purge:
-            stdout_msg('Stage handler could not be purged!', warn=True)
-            failures += 1
+        failures = 0
         files_to_clean = [
             str(file_path) for file_path in (self.state_file, self.report_file)
             if file_path

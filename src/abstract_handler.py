@@ -1,11 +1,13 @@
 import logging
 import os
 import pysnooper
+import datetime
 
 from abc import ABC
 from .backpack.bp_convertors import json2dict
 from .backpack.bp_general import write2file
 from .backpack.bp_shell import shell_cmd as shell
+from .backpack.bp_checkers import check_file_exists
 from .validator import Validator
 
 log = logging.getLogger(__name__)
@@ -47,20 +49,35 @@ class Handler(ABC):
             content = [item.strip('\n') for item in fl.readlines()]
         if not len(content):
             return False if state != 'action' else str()
-        return content[0].split(',')[0] if state == 'action' else True
+        segmented_record = content[0].split(',')
+        return segmented_record[0] if state == 'action' else True
+
+#   @classmethod
+#   @pysnooper.snoop()
+    def update_state_record(self, column_no, value):
+        log.debug('')
+        if not check_file_exists(self.state_file):
+            record = [''] * 5
+        else:
+            with open(self.state_file, 'r') as fl:
+                record = fl.readlines()
+                if record:
+                    record = record[0].split(',')
+                else:
+                    record = [''] * 5
+        record[column_no] = value
+        record[4] = str(datetime.datetime.now())
+        return write2file(','.join(record), file_path=self.state_file, mode='w')
 
 #   @classmethod
 #   @pysnooper.snoop()
     def set_state(self, state_flag, action_label):
         log.debug('')
-        self.state_flag = False
+        self.state_flag = state_flag
         if not state_flag:
             shell('rm {}'.format(self.state_file))
             return True
-        state_record = "{},{},{},{}".format(
-            action_label,self.instruction_set,'',''
-        )
-        return write2file(state_record, file_path=self.state_file, mode='w')
+        return self.update_state_record(0, action_label)
 
 #   @classmethod
 #   @pysnooper.snoop()
@@ -69,6 +86,7 @@ class Handler(ABC):
         converted = json2dict(json_file)
         if not json_file or not converted:
             return False
+        self.update_state_record(1, json_file)
         self.set_instruction(json2dict(json_file))
         return self.instruction_set
 

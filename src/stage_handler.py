@@ -1,4 +1,5 @@
 import logging
+import pysnooper
 
 from .backpack.bp_shell import shell_cmd as shell
 from .backpack.bp_general import write2file, stdout_msg
@@ -30,10 +31,15 @@ class StageHandler(Handler):
 
     # PROCESSORS
 
-    def process_stage_actions(self, actions_list):
+#   @pysnooper.snoop()
+    def process_stage_actions(self, actions_list, skip_to=None):
         log.debug('')
-        failures = 0
+        failures, skip_to_action = 0, None if not skip_to else skip_to[1]
         for action_record_dict in actions_list:
+            if skip_to_action and action_record_dict.get('name') == skip_to_action:
+                skip_to_action = None
+            elif skip_to_action and action_record_dict.get('name') != skip_to_action:
+                continue
             if not self.fetch_state() or self.fetch_state('action') \
                     not in ('started', 'resumed'):
                 stdout_msg(
@@ -48,6 +54,7 @@ class StageHandler(Handler):
                     'Skipping ({})'.format(action_record_dict), warn=True
                 )
                 continue
+            self.update_state_record(3, action_record_dict.get('name', 'Unknown'))
             action = self.action_handler.start()
             if not action:
                 failures += 1
@@ -60,7 +67,7 @@ class StageHandler(Handler):
 
     # ACTIONS
 
-    def start(self):
+    def start(self, skip_to=None):
         log.debug('')
         failures, instruction = 0, self.fetch_instruction()
         if not self.validator.check_instruction(instruction):
@@ -73,7 +80,7 @@ class StageHandler(Handler):
             if not self.fetch_state() or self.fetch_state('action') \
                     not in ('started', 'resumed'):
                 stdout_msg(
-                    'Terminate signal received at stage ({})'.format(stage_label),
+                    'Terminate signal received before stage ({})'.format(stage_label),
                     warn=True
                 )
                 return
@@ -81,7 +88,9 @@ class StageHandler(Handler):
                 'Processing procedure stage... ({})'.format(stage_label),
                 info=True
             )
-            process = self.process_stage_actions(instruction.get(stage_label))
+            process = self.process_stage_actions(
+                instruction.get(stage_label), skip_to=skip_to
+            )
             if not process:
                 failures += 1
                 continue
@@ -95,12 +104,3 @@ class StageHandler(Handler):
             )
         return False if failures else True
 
-    # TODO
-    def stop(self):
-        log.debug('WARNING: Under construction, building...')
-    def cont(self):
-        log.debug('WARNING: Under construction, building...')
-    def purge(self):
-        log.debug('WARNING: Under construction, building...')
-    def pause(self):
-        log.debug('WARNING: Under construction, building...')

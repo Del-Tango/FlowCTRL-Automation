@@ -191,14 +191,6 @@ class ActionHandler(Handler):
 
     # ACTIONS
 
-    # TODO
-    def stop(self):
-        log.debug('WARNING: Under construction, building...')
-    def pause(self):
-        log.debug('WARNING: Under construction, building...')
-    def cont(self):
-        log.debug('WARNING: Under construction, building...')
-
 #   @pysnooper.snoop()
     def start(self):
         log.debug('')
@@ -210,8 +202,5 @@ class ActionHandler(Handler):
         return False if not handle else True
 
 # CODE DUMP
-
-#       stdout, stderr, exit_code = shell(command)
-#       thread = Thread(target=self.detached_shell, args=(command, return_values))
 
 

@@ -18,7 +18,8 @@ from src.backpack.bp_shell import shell_cmd as shell
 
 log = logging.getLogger(__name__)
 
-CONFIG_FILE_PATH = os.path.dirname(os.path.realpath(__file__)) + '/conf/flow-ctrl.conf.json'
+CONFIG_FILE_PATH = os.path.dirname(os.path.realpath(__file__)) \
+    + '/conf/flow-ctrl.conf.json'
 CONFIG = json2dict(CONFIG_FILE_PATH)
 PROCEDURE_HANDLER = Procedure()
 PROCEDURE_SKETCH_FILES = list()
@@ -60,21 +61,25 @@ def format_header_string():
 def action_stop():
     log.debug('')
     stdout_msg('...\n[ INFO ]: Action stop...')
-    PROCEDURE_HANDLER.stop()
+    stop = PROCEDURE_HANDLER.stop()
     stdout_msg('Action stop.\n...', done=True)
-    return 1
+    return 1 if not stop else 0
 
 def action_pause():
     log.debug('')
     stdout_msg('...\n[ INFO ]: Action pause...')
-    PROCEDURE_HANDLER.pause()
+    pause = PROCEDURE_HANDLER.pause()
     stdout_msg('Action pause.\n...', done=True)
-    return 1
+    return 1 if not pause else 0
 
 def action_resume():
     log.debug('')
     stdout_msg('..\n[ INFO ]: Action resume...')
     resume = PROCEDURE_HANDLER.cont()
+    if resume is None:
+        stdout_msg('Action resume.\n...', done=True)
+        return
+    cleanup = PROCEDURE_HANDLER.purge()
     stdout_msg('Action resume.\n...', done=True)
     return 1 if not resume else 0
 
@@ -94,6 +99,7 @@ def action_start():
     stdout_msg('Action start.\n...', done=True)
     return 1 if not procedures else 0
 
+#@pysnooper.snoop()
 def process_procedure_sketch_files(sketch_files):
     log.debug('')
     failure_count = 0
@@ -107,7 +113,9 @@ def process_procedure_sketch_files(sketch_files):
             failure_count += 1
             continue
         execute = PROCEDURE_HANDLER.start()
-        if not execute:
+        if not execute and execute is None:
+            return
+        elif not execute:
             stdout_msg(
                 'Sketch terminated with errors! ({})'.format(file_path),
                 nok=True
@@ -115,6 +123,9 @@ def process_procedure_sketch_files(sketch_files):
             failure_count += 1
         else:
             stdout_msg('Sketch complete! ({})'.format(file_path), ok=True)
+    cleanup = PROCEDURE_HANDLER.purge()
+    if not cleanup:
+        failure_count += 1
     return False if failure_count else True
 
 # PROCESSORS
@@ -297,6 +308,8 @@ def action_handler(*args, **kwargs):
             continue
         stdout_msg('Processing action... ({})'.format(action_label), info=True)
         handle = handlers[action_label](*args, **kwargs)
+        if handle is None:
+            return 0
         if isinstance(handle, int) and handle != 0:
             stdout_msg(
                 'Action ({}) failures detected! ({})'\
@@ -314,6 +327,7 @@ def action_handler(*args, **kwargs):
 def init_flowctrl(config={}, *args, **kwargs):
     log.debug('')
     if not CONFIG['silence']:
+        clear_screen()
         print(format_header_string())
     if not ACTION:
         stdout_msg('No action specified!', warn=True)

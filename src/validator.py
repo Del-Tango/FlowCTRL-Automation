@@ -45,20 +45,20 @@ class Validator():
         log.debug('')
         if not state and not previous_action_label:
             return True
-        return False if state or previous_action_label not in ('purged', '') else True
+        return False if previous_action_label not in ('purged', '') else True
 
-    @pysnooper.snoop()
+#   @pysnooper.snoop()
     def validate_state_action_stop(self, state, previous_action_label, action_label):
         log.debug('')
         return False if not state or previous_action_label not in ('started', 'resumed') else True
 
-    @pysnooper.snoop()
+#   @pysnooper.snoop()
     def validate_state_action_pause(self, state, previous_action_label, action_label):
         log.debug('')
         return self.validate_state_action_stop(state, previous_action_label, action_label)
 
-    @pysnooper.snoop()
+#   @pysnooper.snoop()
     def validate_state_action_resume(self, state, previous_action_label, action_label):
         log.debug('')
-        return False if state or previous_action_label != 'paused' else True
+        return False if previous_action_label != 'paused' else True
 
