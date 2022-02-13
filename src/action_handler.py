@@ -1,7 +1,7 @@
 import logging
-import pysnooper
 import time
 import datetime
+#import pysnooper
 
 from threading import Thread
 from timeit import default_timer as timer
@@ -138,7 +138,9 @@ class ActionHandler(Handler):
         )
         start_time = timer()
         thread.start()
-        timeout = self.handle_shell_cmd_timeout(start_time, timeout, return_values)
+        timeout = self.handle_shell_cmd_timeout(
+            start_time, timeout, return_values
+        )
         if timeout:
             stdout_msg(
                 'Command timed out! ({})'.format(action_dict.get('timeout')),
@@ -153,13 +155,13 @@ class ActionHandler(Handler):
         if exit_code != 0:
             stdout_msg(return_values[1], err=True)
             stdout_msg(
-                'Command terminated with errors! Exit Code ({})'.format(exit_code),
-                nok=True
+                'Command terminated with errors! Exit Code ({})'
+                .format(exit_code), nok=True
             )
         else:
             stdout_msg(
-                'Command terminated Successfully! Exit Code ({})'.format(exit_code),
-                ok=True
+                'Command terminated Successfully! Exit Code ({})'
+                .format(exit_code), ok=True
             )
         return return_values[0], return_values[1], return_values[2]
 
@@ -196,8 +198,8 @@ class ActionHandler(Handler):
             if not teardown: failures += 1
         if failures:
             stdout_msg(
-                'Failures detected when processing action! ({})'.format(failures),
-                warn=True
+                'Failures detected when processing action! ({})'
+                .format(failures), warn=True
             )
         return False if failures else True
 

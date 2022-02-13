@@ -1,9 +1,10 @@
 import logging
 import os
-import pysnooper
 import datetime
+#import pysnooper
 
 from abc import ABC
+
 from .backpack.bp_convertors import json2dict
 from .backpack.bp_general import write2file
 from .backpack.bp_shell import shell_cmd as shell
@@ -24,12 +25,10 @@ class Handler(ABC):
         log.debug('')
         self.instruction_set = kwargs.get('instruction_set')
 
-#   @abstractmethod
     def fetch_instruction(self):
         log.debug('')
         return self.instruction_set
 
-#   @abstractmethod
 #   @pysnooper.snoop()
     def set_instruction(self, instruction_set):
         log.debug('')
@@ -38,7 +37,6 @@ class Handler(ABC):
         self.instruction_set = instruction_set
         return True
 
-#   @classmethod
 #   @pysnooper.snoop()
     def fetch_state(self, state='flag'):
         log.debug('')
@@ -52,7 +50,6 @@ class Handler(ABC):
         segmented_record = content[0].split(',')
         return segmented_record[0] if state == 'action' else True
 
-#   @classmethod
 #   @pysnooper.snoop()
     def update_state_record(self, column_no, value):
         log.debug('')
@@ -69,7 +66,6 @@ class Handler(ABC):
         record[4] = str(datetime.datetime.now())
         return write2file(','.join(record), file_path=self.state_file, mode='w')
 
-#   @classmethod
 #   @pysnooper.snoop()
     def set_state(self, state_flag, action_label):
         log.debug('')
@@ -79,7 +75,6 @@ class Handler(ABC):
             return True
         return self.update_state_record(0, action_label)
 
-#   @classmethod
 #   @pysnooper.snoop()
     def load(self, json_file):
         log.debug('')
@@ -90,19 +85,15 @@ class Handler(ABC):
         self.set_instruction(json2dict(json_file))
         return self.instruction_set
 
-#   @abstractmethod
     def start(self):
         pass
 
-#   @abstractmethod
     def stop(self):
         pass
 
-#   @abstractmethod
-    def cont(selif):            # Continue
+    def cont(self):
         pass
 
-#   @abstractmethod
     def purge(self):
         pass
 

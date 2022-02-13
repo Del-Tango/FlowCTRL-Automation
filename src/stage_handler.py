@@ -1,11 +1,10 @@
 import logging
-import pysnooper
+#import pysnooper
 
 from .backpack.bp_shell import shell_cmd as shell
 from .backpack.bp_general import write2file, stdout_msg
 from .abstract_handler import Handler
 from .action_handler import ActionHandler as Action
-
 
 log = logging.getLogger('FlowCTRL')
 
@@ -36,9 +35,11 @@ class StageHandler(Handler):
         log.debug('')
         failures, skip_to_action = 0, None if not skip_to else skip_to[1]
         for action_record_dict in actions_list:
-            if skip_to_action and action_record_dict.get('name') == skip_to_action:
+            if skip_to_action \
+                    and action_record_dict.get('name') == skip_to_action:
                 skip_to_action, skip_to = None, None
-            elif skip_to_action and action_record_dict.get('name') != skip_to_action:
+            elif skip_to_action \
+                    and action_record_dict.get('name') != skip_to_action:
                 continue
             if not self.action_handler.set_instruction(action_record_dict):
                 failures += 1
@@ -47,7 +48,9 @@ class StageHandler(Handler):
                     'Skipping ({})'.format(action_record_dict), warn=True
                 )
                 continue
-            self.update_state_record(3, action_record_dict.get('name', 'Unknown'))
+            self.update_state_record(
+                3, action_record_dict.get('name', 'Unknown')
+            )
             action = self.action_handler.start()
             if not self.fetch_state() or self.fetch_state('action') \
                     not in ('started', 'resumed'):

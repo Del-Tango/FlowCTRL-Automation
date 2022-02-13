@@ -8,7 +8,7 @@ import logging
 import json
 import os
 import optparse
-import pysnooper
+#import pysnooper
 
 from src.procedure_handler import ProcedureHandler as Procedure
 from src.backpack.bp_log import log_init
@@ -21,7 +21,7 @@ CONFIG_FILE_PATH = os.path.dirname(os.path.realpath(__file__)) \
 CONFIG = json2dict(CONFIG_FILE_PATH)
 PROCEDURE_HANDLER = Procedure()
 PROCEDURE_SKETCH_FILES = list()
-ACTION=''      # start, stop, pause, purge, resume
+ACTION='' # start, stop, pause, purge, resume
 log = logging.getLogger(CONFIG['log-name'])
 
 
@@ -37,6 +37,7 @@ def add_action_to_queue(action_label):
         action_labels.append(str(action_label))
         ACTION = ','.join(set(action_labels))
     return ACTION
+
 
 def reload_config():
     log.debug('')
@@ -66,12 +67,14 @@ def action_stop():
     stdout_msg('Action stop.\n...', done=True)
     return 1 if not stop else 0
 
+
 def action_pause():
     log.debug('')
     stdout_msg('...\n[ INFO ]: Action pause...')
     pause = PROCEDURE_HANDLER.pause()
     stdout_msg('Action pause.\n...', done=True)
     return 1 if not pause else 0
+
 
 def action_resume():
     log.debug('')
@@ -84,12 +87,17 @@ def action_resume():
     stdout_msg('Action resume.\n...', done=True)
     return 1 if not resume else 0
 
+
 def action_purge():
     log.debug('')
     stdout_msg('...\n[ INFO ]: Action purge...')
     purge = PROCEDURE_HANDLER.purge()
+    log_file_path = CONFIG['project-dir'] + '/' + CONFIG['log-dir'] \
+        + '/' + CONFIG['log-file']
+    write2file('', file_path=log_file_path, mode='w')
     stdout_msg('Action purge...\n...', done=True)
     return 1 if not purge else 0
+
 
 def action_start():
     log.debug('')
@@ -99,6 +107,7 @@ def action_start():
     procedures = process_procedure_sketch_files(PROCEDURE_SKETCH_FILES)
     stdout_msg('Action start.\n...', done=True)
     return 1 if not procedures else 0
+
 
 #@pysnooper.snoop()
 def process_procedure_sketch_files(sketch_files):
@@ -137,11 +146,13 @@ def process_log_file_argument(parser, options):
     CONFIG['conf-file-path'] = options.config_file
     return True
 
+
 def process_config_file_argument(parser, options):
     global CONFIG
     log.debug('')
     CONFIG['log-file-path'] = options.log_file
     return True
+
 
 def process_start_argument(parser, options):
     log.debug('')
@@ -149,11 +160,13 @@ def process_start_argument(parser, options):
         return False
     return add_action_to_queue('start')
 
+
 def process_stop_argument(parser, options):
     log.debug('')
     if not options.stop_flag:
         return False
     return add_action_to_queue('stop')
+
 
 def process_pause_argument(parser, options):
     log.debug('')
@@ -161,11 +174,13 @@ def process_pause_argument(parser, options):
         return False
     return add_action_to_queue('pause')
 
+
 def process_resume_argument(parser, options):
     log.debug('')
     if not options.resume_flag:
         return False
     return add_action_to_queue('resume')
+
 
 #@pysnooper.snoop()
 def process_purge_argument(parser, options):
@@ -173,6 +188,7 @@ def process_purge_argument(parser, options):
     if not options.purge_flag:
         return False
     return add_action_to_queue('purge')
+
 
 def process_sketch_file_argument(parser, options):
     global PROCEDURE_SKETCH_FILES
@@ -187,6 +203,7 @@ def process_sketch_file_argument(parser, options):
     PROCEDURE_SKETCH_FILES.append(file_path)
     stdout_msg('[ + ]: Procedure sketch file loaded ({})'.format(file_path))
     return True
+
 
 #@pysnooper.snoop()
 def process_command_line_options(parser):
@@ -276,6 +293,7 @@ def add_command_line_parser_options(parser):
             + 'last sketch file from the stage and action where it left off.'
     )
 
+
 def parse_command_line_arguments():
     log.debug('')
     parser = create_command_line_parser()
@@ -340,8 +358,9 @@ if __name__ == '__main__':
         reload_config()
     if CONFIG:
         log = log_init(
-            CONFIG['project-dir'] + '/' + CONFIG['log-dir'] + '/' + CONFIG['log-file'],
-            CONFIG['log-format'], CONFIG['timestamp-format'], CONFIG['debug'],
+            CONFIG['project-dir'] + '/' + CONFIG['log-dir'] + '/'
+            + CONFIG['log-file'], CONFIG['log-format'],
+            CONFIG['timestamp-format'], CONFIG['debug'],
             log_name=CONFIG['log-name']
         )
         PROCEDURE_HANDLER = Procedure(**{

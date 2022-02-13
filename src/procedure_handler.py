@@ -1,6 +1,6 @@
 import logging
 import os
-import pysnooper
+#import pysnooper
 
 from .backpack.bp_shell import shell_cmd as shell
 from .backpack.bp_checkers import check_file_exists
@@ -27,9 +27,8 @@ class ProcedureHandler(Handler):
         self.instruction_set = kwargs.get('sketch_file', str())
 
     def __print__(self, *args, **kwargs):
-        return "Procedure Handler Instruction: {}, State: {}, Stage Handler: {}".format(
-            self.instruction_set, self.state_flag, self.stage_handler
-        )
+        return "Procedure Handler Instruction: {}, State: {}, Stage Handler: {}"\
+            .format(self.instruction_set, self.state_flag, self.stage_handler)
 
     # FETCHERS
 
@@ -48,7 +47,8 @@ class ProcedureHandler(Handler):
                 skip_to_stage = None
             elif skip_to_stage and stage_id != skip_to_stage:
                 continue
-            if not self.stage_handler.set_instruction({stage_id: stages_dict[stage_id]}):
+            if not self.stage_handler.set_instruction(
+                    {stage_id: stages_dict[stage_id]}):
                 failures += 1
                 stdout_msg(
                     'Could not load procedure stage ({}) to handler! '
@@ -77,7 +77,9 @@ class ProcedureHandler(Handler):
         if not self.validator.check_state(
                 self.fetch_state(), self.fetch_state('action'), 'stop'):
             stdout_msg('Invalid state for action stop!', warn=True)
-            stdout_msg('To force action execute with --purge beforehand.', info=True)
+            stdout_msg(
+                'To force action execute with --purge beforehand.', info=True
+            )
             return False
         state_details = []
         if check_file_exists(self.state_file):
@@ -87,10 +89,12 @@ class ProcedureHandler(Handler):
         if not state:
             failures += 1
             stdout_msg(
-                'Could not stop running session! ({})'.format(state_details), nok=True
+                'Could not stop running session! ({})'
+                .format(state_details), nok=True
             )
         else:
-            stdout_msg('Session terminated! ({})'.format(state_details), ok=True)
+            stdout_msg('Session terminated! ({})'
+                       .format(state_details), ok=True)
         if failures:
             stdout_msg(
                 'Failures detected when processing ({}) sketch stages! ({})'
@@ -98,14 +102,16 @@ class ProcedureHandler(Handler):
             )
         return False if failures else True
 
+#   @pysnooper.snoop()
     def cont(self):
         log.debug('')
         if not self.validator.check_state(
                 self.fetch_state(), self.fetch_state('action'), 'resume'):
             stdout_msg('Invalid state for action resume!', warn=True)
-            stdout_msg('To force action execute with --purge beforehand.', info=True)
+            stdout_msg(
+                'To force action execute with --purge beforehand.', info=True
+            )
             return False
-
         failures, state = 0, self.set_state(True, 'resumed')
         with open(self.state_file, 'r') as fl:
             state_details = [line.strip('\n') for line in fl.readlines()]
@@ -116,7 +122,8 @@ class ProcedureHandler(Handler):
             )
         else:
             segmented_record = state_details[0].split(',')
-            previous_action, sketch_file_path = segmented_record[0], segmented_record[1]
+            previous_action = segmented_record[0]
+            sketch_file_path = segmented_record[1]
             stage_id, action_id = segmented_record[2], segmented_record[3]
             reload_sketch = self.load(sketch_file_path)
             if not reload_sketch:
@@ -129,7 +136,6 @@ class ProcedureHandler(Handler):
                 with open(self.state_file, 'r') as fl:
                     state_details = [line.strip('\n') for line in fl.readlines()]
                 stdout_msg('Session resumed! ({})'.format(state_details), ok=True)
-
                 process = self.process_sketch_stages(
                     self.fetch_instruction(), skip_to=[stage_id, action_id]
                 )
@@ -171,14 +177,15 @@ class ProcedureHandler(Handler):
         if not self.validator.check_state(
                 self.fetch_state(), self.fetch_state('action'), 'start'):
             stdout_msg('Invalid state for action start!', warn=True)
-            stdout_msg('To force action execute with --purge beforehand.', info=True)
+            stdout_msg(
+                'To force action execute with --purge beforehand.', info=True
+            )
             return False
         self.set_state(True, 'started')
         process = self.process_sketch_stages(self.fetch_instruction())
         if process is None:
             return
         return False if not process else True
-
 
     def purge(self):
         log.debug('')
