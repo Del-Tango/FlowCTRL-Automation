@@ -1,24 +1,30 @@
+#!/usr/bin/python3
+#
+# Regards, the Alveare Solutions #!/Society -x
+#
+# THREADZ
+
+import threading
 import logging
 
-from threading import Thread
-
-log = logging.getLogger('FlowCTRL')
-
-# THREADS
+log = logging.getLogger('')
 
 
-# TODO - Under construction, building...
-class ThreadWithReturnValue(Thread):
+def threadify(function_obj, *args, join=False, **kwargs):
+    log.info(
+        'Threadifying function ({}) - Args: {}, Join: {}, Kwargs: {}'.format(
+            function_obj, args, join, kwargs
+        )
+    )
+    func_thread = threading.Thread(target=function_obj, args=args)
+    try:
+        func_thread.start()
+        if join:
+            func_thread.join()
+    except Exception as e:
+        log.error(e)
+        return False
+    log.info('Function threadified! ({})'.format(func_thread))
+    return func_thread
 
-    def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=None):
-        Thread.__init__(self, group, target, name, args, kwargs, Verbose)
-        self._return = None
-
-    def run(self):
-        if self._Thread__target is not None:
-            self._return = self._Thread__target(*self._Thread__args, **self._Thread__kwargs)
-
-    def join(self):
-        Thread.join(self)
-        return self._return
 
