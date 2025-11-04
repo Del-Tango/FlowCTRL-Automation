@@ -4,7 +4,6 @@ Flow-CTRL - Main Entry Point
 """
 
 import sys
-# FIX: Correct import path
 from src.cli.interface import main
 
 if __name__ == '__main__':

@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 
 from flow_ctrl.src.core.validator import Validator
-from tests.fixtures.sample_sketches import SIMPLE_SKETCH, INVALID_SKETCH
+from flow_ctrl.tst.fixtures.sample_sketches import SIMPLE_SKETCH, INVALID_SKETCH
 
 
 class TestValidator:

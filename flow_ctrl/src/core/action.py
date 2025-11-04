@@ -4,22 +4,17 @@ Action representation and execution logic
 
 import logging
 import time
+
 from typing import Dict, Any, Optional, Tuple
 from dataclasses import dataclass
 from threading import Thread, Event
 
-# FIX: Remove non-existent handler imports
-# from handlers.action_handler import ActionHandler
-from ..utils.shell import ShellExecutor  # FIX: Correct import path
-from ..utils.state_manager import StateManager  # FIX: Correct import path
-from ..config.settings import TIME_MULTIPLIERS  # FIX: Correct import path
-
-#   from handlers.action_handler import ActionHandler
-#   from .shell import ShellExecutor
-#   from .state_manager import StateManager
-#   from conf.settings import TIME_MULTIPLIERS
+from ..utils.shell import ShellExecutor
+from ..utils.state_manager import StateManager
+from ..config.settings import TIME_MULTIPLIERS
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class CommandResult:
@@ -29,6 +24,7 @@ class CommandResult:
     stderr: str
     exit_code: int
     execution_time: float
+
 
 class Action:
     """Represents a single automation action"""

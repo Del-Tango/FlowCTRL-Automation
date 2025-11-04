@@ -4,17 +4,15 @@ Command-line interface for Flow-CTRL
 
 import argparse
 import sys
+import pysnooper
+
 from pathlib import Path
 from typing import Optional
 
-# FIX: Correct import paths
 from ..core.engine import FlowEngine
 from ..config.settings import DEFAULT_CONFIG
 from ..utils.logger import ConsoleOutput
 
-#   from .engine import FlowEngine
-#   from conf.settings import DEFAULT_CONFIG
-#   from utils.logger import ConsoleOutput
 
 class FlowCLI:
     """Command-line interface for Flow-CTRL"""
@@ -25,26 +23,38 @@ class FlowCLI:
 
     def parse_arguments(self):
         """Parse command line arguments"""
+
+        if not self.config.silence:
+            self._display_banner()
+
         parser = argparse.ArgumentParser(
-            description='Flow-CTRL - Procedure Automation Framework',
-            epilog="""
-            Example procedure sketch JSON format:
-            {
-                "Stage_ID": [
-                    {
-                        "name": "Action_ID",
-                        "time": "5m",
-                        "timeout": "10m",
-                        "cmd": "ls -la && echo 'Operation completed'",
-                        "setup-cmd": "echo 'Preparing execution...'",
-                        "teardown-cmd": "echo 'Cleaning up...'",
-                        "on-ok-cmd": "echo 'Success handler'",
-                        "on-nok-cmd": "echo 'Error handler'",
-                        "fatal-nok": false
-                    }
-                ]
-            }
-            """
+            usage="""flow_ctrl [-h] [-f FILE] [-c FILE] [-l FILE] [-S|-s|-p|-R] [-P] [--silence] [--debug]
+
+[ EXAMPLE ]:
+
+    ~$ flow_ctrl --start --sketch-file automate_me.json
+    ~$ flow_ctrl --purge --start --sketch-file automate_me.json
+    ~$ flow_ctrl --pause
+    ~$ flow_ctrl --resume
+    ~$ flow_ctrl --stop
+
+[ EXAMPLE ]: Procedure sketch JSON format:
+
+{
+    "Stage_ID": [
+        {
+            "name": "Action_ID",
+            "time": "5m",
+            "timeout": "10m",
+            "cmd": "ls -la && echo 'Operation completed'",
+            "setup-cmd": "echo 'Preparing execution...'",
+            "teardown-cmd": "echo 'Cleaning up...'",
+            "on-ok-cmd": "echo 'Success handler'",
+            "on-nok-cmd": "echo 'Error handler'",
+            "fatal-nok": false
+        }
+    ]
+}"""
         )
 
         parser.add_argument('--sketch-file', '-f', type=str,
@@ -93,13 +103,11 @@ class FlowCLI:
         # Create engine
         self.engine = FlowEngine(self.config)
 
+    # @pysnooper.snoop()
     def run(self):
         """Run the CLI"""
-        args = self.parse_arguments()
 
-        # Display banner
-        if not args.silence:
-            self._display_banner()
+        args = self.parse_arguments()
 
         # Setup engine
         self.setup_engine(args)
@@ -110,6 +118,7 @@ class FlowCLI:
         try:
             if args.purge:
                 result = self.engine.purge_data()
+                ConsoleOutput.info(result)
                 exit_code = result.exit_code
 
             if args.start:
@@ -119,6 +128,7 @@ class FlowCLI:
                 else:
                     if self.engine.load_procedure(args.sketch_file):
                         result = self.engine.start_procedure()
+                        ConsoleOutput.info(result)
                         exit_code = result.exit_code
                     else:
                         ConsoleOutput.error("Failed to load procedure")
@@ -126,14 +136,17 @@ class FlowCLI:
 
             elif args.stop:
                 result = self.engine.stop_procedure()
+                ConsoleOutput.info(result)
                 exit_code = result.exit_code
 
             elif args.pause:
                 result = self.engine.pause_procedure()
+                ConsoleOutput.info(result)
                 exit_code = result.exit_code
 
             elif args.resume:
                 result = self.engine.resume_procedure()
+                ConsoleOutput.info(result)
                 exit_code = result.exit_code
 
             else:
@@ -150,15 +163,19 @@ class FlowCLI:
 
         sys.exit(exit_code)
 
+    def _cli_banner(self):
+        banner = """
+    ___________________________________________________________________________
+
+      *              *   Flow CTRL * Automation Framework   *               *
+    ___________________________________________________________________________
+                    Regards, the Alveare Solutions #!/Society -x
+        """
+        return banner
+
     def _display_banner(self):
         """Display application banner"""
-        banner = """
-        ___________________________________________________________________________
-
-          *              *   Flow CTRL * Automation Framework   *               *
-        ___________________________________________________________________________
-                        Regards, the Alveare Solutions #!/Society -x
-        """
+        banner = self._cli_banner()
         ConsoleOutput.banner(banner)
 
 def main():

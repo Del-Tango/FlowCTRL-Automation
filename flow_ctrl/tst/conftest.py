@@ -9,7 +9,7 @@ from pathlib import Path
 from unittest.mock import Mock
 
 from flow_ctrl.src.config.settings import FlowConfig, DEFAULT_CONFIG
-from tests.fixtures.test_config import create_test_config, create_mock_config, cleanup_test_config
+from flow_ctrl.tst.fixtures.test_config import create_test_config, create_mock_config, cleanup_test_config
 
 
 @pytest.fixture

@@ -6,10 +6,10 @@ import pytest
 import tempfile
 import json
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from flow_ctrl.src.cli.interface import FlowCLI, main
-from tests.fixtures.sample_sketches import SIMPLE_SKETCH
+from flow_ctrl.tst.fixtures.sample_sketches import SIMPLE_SKETCH
 
 
 class TestFlowCLI:

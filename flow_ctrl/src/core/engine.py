@@ -4,19 +4,19 @@ Main Flow-CTRL engine coordinating procedure execution
 
 import logging
 import json
+import pysnooper
+
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
+
 from .procedure import Procedure
 from .validator import Validator
-
-from ..utils.state_manager import StateManager  # FIX: Correct import path
-from ..utils.logger import setup_logging  # FIX: Correct import path
-
-#   from .state_manager import StateManager
-#   from .logger import setup_logging
+from ..utils.state_manager import StateManager
+from ..utils.logger import setup_logging
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class ExecutionResult:
@@ -25,6 +25,7 @@ class ExecutionResult:
     message: str
     exit_code: int
     details: Dict[str, Any]
+
 
 class FlowEngine:
     """Main engine coordinating automation workflows"""
@@ -71,6 +72,7 @@ class FlowEngine:
             logger.error(f"Failed to load procedure: {e}")
             return False
 
+    # @pysnooper.snoop()
     def start_procedure(self) -> ExecutionResult:
         """Start procedure execution"""
         if not self.current_procedure:
@@ -81,12 +83,16 @@ class FlowEngine:
                 details={}
             )
 
-        if not self.validator.validate_state(self.state_manager.get_state(), 'start'):
+        # Get current state and previous action for validation
+        current_state = self.state_manager.get_state()
+        previous_action = self.state_manager.get_state_field(0) or ''
+
+        if not self.validator.validate_state(current_state, previous_action, 'start'):
             return ExecutionResult(
                 success=False,
                 message="Invalid state for start action",
                 exit_code=1,
-                details={'state': self.state_manager.get_state()}
+                details={'state': current_state, 'previous_action': previous_action}
             )
 
         try:
@@ -121,12 +127,14 @@ class FlowEngine:
     def pause_procedure(self) -> ExecutionResult:
         """Pause current procedure"""
         current_state = self.state_manager.get_state()
-        if not self.validator.validate_state(current_state, 'pause'):
+        previous_action = self.state_manager.get_state_field(0) or ''
+
+        if not self.validator.validate_state(current_state, previous_action, 'pause'):
             return ExecutionResult(
                 success=False,
                 message="Invalid state for pause action",
                 exit_code=1,
-                details={'state': current_state}
+                details={'state': current_state, 'previous_action': previous_action}
             )
 
         self.state_manager.set_state(True, 'paused')
@@ -142,12 +150,14 @@ class FlowEngine:
     def resume_procedure(self) -> ExecutionResult:
         """Resume paused procedure"""
         current_state = self.state_manager.get_state()
-        if not self.validator.validate_state(current_state, 'resume'):
+        previous_action = self.state_manager.get_state_field(0) or ''
+
+        if not self.validator.validate_state(current_state, previous_action, 'resume'):
             return ExecutionResult(
                 success=False,
                 message="Invalid state for resume action",
                 exit_code=1,
-                details={'state': current_state}
+                details={'state': current_state, 'previous_action': previous_action}
             )
 
         self.state_manager.set_state(True, 'resumed')
@@ -164,12 +174,14 @@ class FlowEngine:
     def stop_procedure(self) -> ExecutionResult:
         """Stop current procedure"""
         current_state = self.state_manager.get_state()
-        if not self.validator.validate_state(current_state, 'stop'):
+        previous_action = self.state_manager.get_state_field(0) or ''
+
+        if not self.validator.validate_state(current_state, previous_action, 'stop'):
             return ExecutionResult(
                 success=False,
                 message="Invalid state for stop action",
                 exit_code=1,
-                details={'state': current_state}
+                details={'state': current_state, 'previous_action': previous_action}
             )
 
         self.state_manager.set_state(False, 'stopped')
@@ -208,3 +220,6 @@ class FlowEngine:
                 exit_code=1,
                 details={'error': str(e)}
             )
+
+# CODE DUMP
+

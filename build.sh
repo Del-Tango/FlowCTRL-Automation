@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 #
 # Python Build WizZard
 
@@ -111,21 +111,31 @@ function test_module() {
     return $EXIT_CODE
 }
 
-function setup_module() {
+function setup_project() {
     local FAILURES=0
     echo "[ SETUP ]: System dependencies..."
-    for package in ${DEPENDENCIES[@]}; do
-        apt-get install "${package}" -y
-        if [ $? -ne 0 ]; then
-            local FAILURES=$((FAILURES + 1))
-        fi
-    done
+
+    if [[ "${YES}" != 'on' ]]; then
+        echo "[ INFO ]: The following project dependencies are to be installed using elevated privileges: ${DEPENDENCIES[@]}"
+        read -p "Continue? [Y/N]> " ANSWER
+    fi
+    if [[ "${YES}" == 'on' ]] || [[ "${ANSWER}" == 'y' || "${ANSWER}" == 'Y' ]]; then
+        for package in ${DEPENDENCIES[@]}; do
+            sudo apt-get install "${package}" -y
+            if [ $? -ne 0 ]; then
+                local FAILURES=$((FAILURES + 1))
+            fi
+        done
+    fi
     if [ ! -d "${VENV_DIR}" ]; then
         if ! python3 -m venv ${VENV_DIR}; then
             local FAILURES=$((FAILURES + 1))
-            echo "[ WARNING ]: Could not create Python3 Virtual Environment in "\
-                "(${VENV_DIR})!"
+            echo "[ WARNING ]: Could not create Python3 Virtual Environment in (${VENV_DIR})!"
         fi
+    fi
+    echo "[ ... ]: Activating Python virtual environment"
+    if ! source ${VENV_DIR}/bin/activate; then
+        echo "[ WARNING ]: Could not activate Python3 Virtual Environment!"
     fi
     echo "[ ... ]: Python requirements"
     if [ -d "${VENV_DIR}" ]; then
@@ -157,12 +167,12 @@ function cleanup() {
     echo "[ CLEANING ]: Project directory for Ricks..."
     local FAILURES=0
     echo "[ ... ]: Compiled Python __pycache__ directories"
-    rm -rf `find . -type d -name '__pycache__'`
+    find . -type d -name '__pycache__' -exec rm -rf {} \; &> /dev/null
     if [ $? -ne 0 ]; then
         local FAILURES=$((FAILURES + 1))
     fi
     echo "[ ... ]: Python build directories"
-    rm -rf ${BUILD_DIRS[@]} ${DOCKER_BUILD_DIR}
+    rm -rf ${BUILD_DIRS[@]}
     if [ $? -ne 0 ]; then
         local FAILURES=$((FAILURES + 1))
     fi
@@ -227,6 +237,7 @@ function install() {
     return $?
 }
 
+# TODO
 function publish() {
     echo "[ PUBLISH ]: To pypi..."
     echo "[ WARNING ]: Publishing currently disabled for this project."
@@ -279,7 +290,7 @@ for opt in ${@}; do
             ;;
         -S|--setup)
             MODE='SETUP'
-            setup_module
+            setup_project
             EXIT_CODE=$((EXIT_CODE + $?))
             ;;
         -T|--test)
@@ -320,63 +331,4 @@ fi
 exit $EXIT_CODE
 
 # CODE DUMP
-
-# declare -a DOCKER_CONTEXT_FILES
-
-# DOCKER_IMG_REPO='public.ecr.aws/g6x6g6f5'
-##MODULE_CONF_FILE='conf/module.conf.json'
-
-
-#   DOCKER_BUILD_DIR='./docker_build/'
-#   DOCKER_APP_DIR='/app'
-#   DOCKER_MAINTAINER_NAME='WanoLabs'
-#   DOCKER_MAINTAINER_EMAIL='alvearesolutions@gmail.com'
-#   DOCKER_IMAGE_VERSION='1.0'
-#   DOCKER_IMAGE_DESCRIPTION='This is a Kaya module Docker image.'
-#   DOCKER_CONTEXT_FILES=(
-#       "${REQUIREMENTS_FILE}"
-#       "${MODULE_CONF_FILE}"
-#   )
-#   DOCKER_CONTEXT_FILES_OPTIONAL=(
-#       "${DISTRIBUTION_DIR}/${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz"
-#   )
-#   REPOSITORY_DOMAIN='kaya'
-#   PY_REPO='kaya-modules-py'
-
-#   DOCKER_IMAGE="${PACKAGE_NAME}"
-#   DOCKER_CONTAINER='kaya_base_integration_tests'
-#   DOCKERFILE="Dockerfile"
-
-#       -d=*|--docker-container=*)
-#           DOCKER_CONTAINER="${opt#*=}"
-#           ;;
-#       -D=*|--docker-image=*)
-#           DOCKER_IMAGE="${opt#*=}"
-#           ;;
-#       -F=*|--docker-file=*)
-#           DOCKERFILE="${opt#*=}"
-#           ;;
-#
-#       ${VENV_DIR}/bin/python3 -m build --sdist --no-isolation
-
-#       python3 -m build --sdist --no-isolation
-#
-#       -d=| --docker-container=ID  Implies --test. Specify running Docker container
-#          |                        to run integration tests in.
-
-#       -D=| --docker-image=ID      Specify name of Docker image.
-
-#       -F=| --docker-file=PATH     Specify path to Docker image Dockerfile.
-
-#   [ Example ]: Specify integration test environment -
-
-#       ~$ $0 --test --docker-container='test_cont' --docker-image='test_img' \\
-#           --docker-file='./Dockerfile'
-#
-#   [ Example ]: Build distribuition and publish to PyPI -
-#       ~$ $0 PUBLISH
-
-#   [ Example ]: Build, install and publish to PyPI -
-#       ~$ $0 INSTALL PUBLISH
-
 

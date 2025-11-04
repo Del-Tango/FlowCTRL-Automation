@@ -2,13 +2,15 @@
 State management for procedure execution
 """
 
+import csv
 import logging
+
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime
-import csv
 
 logger = logging.getLogger(__name__)
+
 
 class StateManager:
     """Manages procedure execution state"""

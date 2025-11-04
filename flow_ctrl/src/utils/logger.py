@@ -4,8 +4,10 @@ Logging configuration and utilities
 
 import logging
 import logging.handlers
+
 from pathlib import Path
 from typing import Optional
+
 
 def setup_logging(log_file: Path, log_name: str = "FlowCTRL",
                  log_format: str = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -46,9 +48,11 @@ def setup_logging(log_file: Path, log_name: str = "FlowCTRL",
 
     return logger
 
+
 def get_logger(name: str) -> logging.Logger:
     """Get a logger instance"""
     return logging.getLogger(name)
+
 
 class ConsoleOutput:
     """Console output utilities with formatting"""
@@ -81,6 +85,6 @@ class ConsoleOutput:
     @staticmethod
     def banner(message: str):
         """Print banner message"""
-        print(f"\n{'='*60}")
+#       print(f"\n{'='*60}")
         print(message)
-        print(f"{'='*60}\n")
+#       print(f"{'='*60}\n")

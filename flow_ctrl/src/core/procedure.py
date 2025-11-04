@@ -3,15 +3,16 @@ Procedure representation and execution logic
 """
 
 import logging
+import pysnooper
+
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
-from .stage import Stage
 
-# FIX: Remove non-existent handler imports
-# from handlers.procedure_handler import ProcedureHandler
+from .stage import Stage
 from ..utils.state_manager import StateManager  # FIX: Correct import path
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class ProcedureStats:
@@ -22,6 +23,7 @@ class ProcedureStats:
     completed_actions: int
     success_count: int
     failure_count: int
+
 
 class Procedure:
     """Represents a complete automation procedure"""
@@ -49,6 +51,8 @@ class Procedure:
             self.stats.total_stages += 1
             self.stats.total_actions += len(actions_data)
 
+
+    @pysnooper.snoop()
     def execute(self) -> bool:
         """Execute the complete procedure"""
         logger.info(f"Executing procedure: {self.name}")

@@ -9,7 +9,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 from flow_ctrl.src.core.engine import FlowEngine
-from tests.fixtures.sample_sketches import SIMPLE_SKETCH
+from flow_ctrl.tst.fixtures.sample_sketches import SIMPLE_SKETCH
 
 
 class TestFlowEngine:

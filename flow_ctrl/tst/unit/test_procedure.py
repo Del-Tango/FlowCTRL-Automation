@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import Mock, patch
 
 from flow_ctrl.src.core.procedure import Procedure
-from tests.fixtures.sample_sketches import MULTI_STAGE_SKETCH
+from flow_ctrl.tst.fixtures.sample_sketches import MULTI_STAGE_SKETCH
 
 
 class TestProcedure:

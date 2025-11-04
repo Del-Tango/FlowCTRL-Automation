@@ -3,15 +3,15 @@ Stage representation and execution logic
 """
 
 import logging
+
 from typing import Dict, List, Any
 from dataclasses import dataclass
-from .action import Action
 
-# FIX: Remove non-existent handler imports
-# from handlers.stage_handler import StageHandler
-from ..utils.state_manager import StateManager  # FIX: Correct import path
+from .action import Action
+from ..utils.state_manager import StateManager
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class StageStats:
@@ -20,6 +20,7 @@ class StageStats:
     completed_actions: int
     success_count: int
     failure_count: int
+
 
 class Stage:
     """Represents a stage within a procedure"""

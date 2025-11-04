@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import Mock, patch
 
 from flow_ctrl.src.core.stage import Stage
-from tests.fixtures.sample_sketches import SIMPLE_SKETCH
+from flow_ctrl.tst.fixtures.sample_sketches import SIMPLE_SKETCH
 
 
 class TestStage:

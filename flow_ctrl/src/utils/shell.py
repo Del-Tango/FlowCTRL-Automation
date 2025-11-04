@@ -6,10 +6,12 @@ import subprocess
 import threading
 import time
 import logging
+
 from typing import NamedTuple, List, Optional
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
+
 
 class CommandResult(NamedTuple):
     """Result of command execution"""
@@ -17,12 +19,14 @@ class CommandResult(NamedTuple):
     stderr: str
     exit_code: int
 
+
 @dataclass
 class TimeoutResult:
     """Result for timed-out command"""
     stdout: str = ""
     stderr: str = "Command timed out"
     exit_code: int = 124
+
 
 class ShellExecutor:
     """Executes shell commands with timeout and thread support"""
