@@ -14,7 +14,7 @@ class FlowConfig:
     """Main configuration class"""
 
     project_dir: str
-    log_dir: str = "logs"
+    log_dir: str = "/tmp/flow_ctrl"
     conf_dir: str = "conf"
     state_file: str = ".flow-ctrl.state.tmp"
     report_file: str = ".flow-ctrl.report.tmp"
@@ -29,7 +29,7 @@ class FlowConfig:
 BASE_DIR = Path(__file__).parent.parent.parent
 DEFAULT_CONFIG = FlowConfig(
     project_dir=str(BASE_DIR),  # FIX: Use absolute path
-    log_dir="logs",
+    log_dir="/tmp/flow_ctrl",
     conf_dir="conf",
     state_file=".flow-ctrl.state.tmp",
     report_file=".flow-ctrl.report.tmp",

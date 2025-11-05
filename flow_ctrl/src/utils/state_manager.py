@@ -1,10 +1,10 @@
+# ./flow_ctrl/src/utils/state_manager.py
 """
-State management for procedure execution
+State management for procedure execution with command support
 """
 
 import csv
 import logging
-
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class StateManager:
-    """Manages procedure execution state"""
+    """Manages procedure execution state with command capabilities"""
 
     def __init__(self, state_file: str):
         self.state_file = Path(state_file)
@@ -25,30 +25,88 @@ class StateManager:
             self.state_file.parent.mkdir(parents=True, exist_ok=True)
             self.state_file.touch()
 
+    def _read_state_record(self) -> List[str]:
+        """Read current state record from file"""
+        try:
+            if not self.state_file.exists() or self.state_file.stat().st_size == 0:
+                return [""] * 5  # Return empty record
+
+            content = self.state_file.read_text().strip()
+            if not content:
+                return [""] * 5
+
+            fields = content.split(",")
+            # Ensure we have exactly 5 fields
+            while len(fields) < 5:
+                fields.append("")
+            return fields[:5]  # Return only first 5 fields
+        except Exception as e:
+            logger.error(f"Error reading state record: {e}")
+            return [""] * 5
+
+    def _write_state_record(self, state_record: List[str]) -> bool:
+        """Write state record to file"""
+        try:
+            # Ensure we have exactly 5 fields
+            while len(state_record) < 5:
+                state_record.append("")
+            state_record = state_record[:5]
+
+            # Always update timestamp in field 4
+            state_record[4] = datetime.now().isoformat()
+
+            self.state_file.write_text(",".join(state_record))
+            return True
+        except Exception as e:
+            logger.error(f"Error writing state record: {e}")
+            return False
+
     def set_state(self, active: bool, action: str) -> bool:
         """Set overall procedure state"""
         try:
             if not active:
-                # Clear state file when deactivating
+                # Clear state file when deactivating - this signals STOP to other processes
                 self.state_file.write_text("")
-                logger.debug("State cleared")
+                logger.debug("State cleared (STOP command)")
                 return True
 
-            # Create state record
+            # Read existing state to preserve fields 1-3
+            current_state = self._read_state_record()
+
+            # Update only action and timestamp, preserve other fields
             state_record = [
-                action,  # Current action
-                "",  # Sketch file
-                "",  # Current stage
-                "",  # Current action
-                datetime.now().isoformat(),  # Timestamp
+                action,  # Current action (field 0)
+                current_state[1] if len(current_state) > 1 else "",  # Sketch file (field 1)
+                current_state[2] if len(current_state) > 2 else "",  # Current stage (field 2)
+                current_state[3] if len(current_state) > 3 else "",  # Current action (field 3)
+                datetime.now().isoformat(),  # Timestamp (field 4)
             ]
 
-            self.state_file.write_text(",".join(state_record))
-            logger.debug(f"State set to: {action}")
-            return True
+            return self._write_state_record(state_record)
 
         except Exception as e:
             logger.error(f"Error setting state: {e}")
+            return False
+
+    def send_command(self, command: str) -> bool:
+        """Send a command to the main process"""
+        try:
+            # Read existing state to preserve current context
+            current_state = self._read_state_record()
+
+            # Create command record preserving existing context
+            command_record = [
+                command,  # Command as action (field 0)
+                current_state[1] if len(current_state) > 1 else "",  # Preserve sketch file
+                current_state[2] if len(current_state) > 2 else "",  # Preserve current stage
+                current_state[3] if len(current_state) > 3 else "",  # Preserve current action
+                datetime.now().isoformat(),  # Update timestamp
+            ]
+
+            return self._write_state_record(command_record)
+
+        except Exception as e:
+            logger.error(f"Error sending command {command}: {e}")
             return False
 
     def get_state(self) -> bool:
@@ -78,25 +136,18 @@ class StateManager:
     def update_state(self, field_index: int, value: str) -> bool:
         """Update specific field in state record"""
         try:
-            if not self.get_state():
-                # Create new state record if none exists
-                state_record = [""] * 5
-            else:
-                # Read existing state
-                content = self.state_file.read_text().strip()
-                state_record = content.split(",")
-                # Ensure we have enough fields
-                while len(state_record) < 5:
-                    state_record.append("")
+            # Read existing state
+            state_record = self._read_state_record()
 
-            # Update the field
+            # Validate field index
+            if field_index < 0 or field_index >= len(state_record):
+                logger.error(f"Invalid field index: {field_index}")
+                return False
+
+            # Update the specific field
             state_record[field_index] = value
-            # Always update timestamp
-            state_record[4] = datetime.now().isoformat()
 
-            self.state_file.write_text(",".join(state_record))
-            logger.debug(f"State updated - field {field_index}: {value}")
-            return True
+            return self._write_state_record(state_record)
 
         except Exception as e:
             logger.error(f"Error updating state: {e}")
@@ -133,3 +184,6 @@ class StateManager:
         except Exception as e:
             logger.error(f"Error purging state: {e}")
             return False
+
+# CODE DUMP
+

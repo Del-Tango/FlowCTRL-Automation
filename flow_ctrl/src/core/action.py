@@ -11,6 +11,7 @@ from threading import Thread, Event
 
 from ..utils.shell import ShellExecutor
 from ..utils.state_manager import StateManager
+from ..utils.logger import ConsoleOutput
 from ..config.settings import TIME_MULTIPLIERS
 
 logger = logging.getLogger(__name__)
@@ -68,6 +69,7 @@ class Action:
 
     def execute(self) -> bool:
         """Execute the action with all associated commands"""
+        ConsoleOutput.info(f'Executing Procedure Stage Action: {self.name}')
         logger.info(f"Executing action: {self.name}")
 
         try:

@@ -40,6 +40,7 @@ class ShellExecutor:
             if user:
                 command = f"su {user} -c '{command}'"
 
+            ConsoleOutput.banner(f'CMD> {command}')
             logger.debug(f"Executing command: {command}")
 
             process = subprocess.Popen(
@@ -57,8 +58,9 @@ class ShellExecutor:
             stdout = stdout.rstrip("\n")
             stderr = stderr.rstrip("\n")
 
+            ConsoleOutput.banner(stdout + '\n')
             if exit_code != 0:
-                ConsoleOutput.nok(stderr)
+                ConsoleOutput.nok(stderr + '\n')
 
             logger.debug(
                 f"Command result - Exit: {exit_code}, Stdout: {stdout[:100]}, Stderr: {stderr[:100]}"

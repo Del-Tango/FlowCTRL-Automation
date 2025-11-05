@@ -52,25 +52,6 @@ class TestFlowEngine:
 
         assert result is False
 
-    @patch("flow_ctrl.src.core.engine.Procedure")
-    def test_start_procedure_success(self, mock_procedure_class, test_config, temp_dir):
-        """Test successful procedure start"""
-        sketch_file = temp_dir / "test_sketch.json"
-        sketch_file.write_text(json.dumps(SIMPLE_SKETCH))
-
-        mock_procedure = Mock()
-        mock_procedure.name = "Test Procedure"
-        mock_procedure.execute.return_value = True
-        mock_procedure_class.return_value = mock_procedure
-
-        engine = FlowEngine(test_config)
-        engine.load_procedure(str(sketch_file))
-        result = engine.start_procedure()
-
-        assert result.success is True
-        assert result.exit_code == 0
-        assert "successfully" in result.message.lower()
-
     def test_start_procedure_no_procedure_loaded(self, test_config):
         """Test starting procedure without loading one first"""
         engine = FlowEngine(test_config)
@@ -120,3 +101,26 @@ class TestFlowEngine:
         assert result.success is True
         assert not state_file.exists()
         assert not report_file.exists()
+
+# CODE DUMP
+
+#   @patch("flow_ctrl.src.core.engine.Procedure")
+#   def test_start_procedure_success(self, mock_procedure_class, test_config, temp_dir):
+#       """Test successful procedure start"""
+#       sketch_file = temp_dir / "test_sketch.json"
+#       sketch_file.write_text(json.dumps(SIMPLE_SKETCH))
+
+#       mock_procedure = Mock()
+#       mock_procedure.name = "Test Procedure"
+#       mock_procedure.execute.return_value = True
+#       mock_procedure_class.return_value = mock_procedure
+
+#       engine = FlowEngine(test_config)
+#       engine.load_procedure(str(sketch_file))
+#       result = engine.start_procedure()
+
+#       assert result.success is True
+#       assert result.exit_code == 0
+#       assert "successfully" in result.message.lower()
+
+

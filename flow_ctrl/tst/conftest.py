@@ -133,52 +133,8 @@ def cleanup_temp_files():
     """Auto-cleanup temporary files after each test"""
     # Setup
     yield
-    # Teardown - any additional cleanup can go here
+    # Teardown - any additional cleanup
 
 
 # CODE DUMP
 
-#   """
-#   Pytest configuration and shared fixtures
-#   """
-
-#   import pytest
-#   import tempfile
-#   import json
-#   from pathlib import Path
-#   from unittest.mock import Mock
-
-#   from flow_ctrl.src.config.settings import FlowConfig, DEFAULT_CONFIG
-
-
-#   @pytest.fixture
-#   def temp_dir():
-#       """Create temporary directory for test files"""
-#       with tempfile.TemporaryDirectory() as tmp_dir:
-#           yield Path(tmp_dir)
-
-
-#   @pytest.fixture
-#   def test_config(temp_dir):
-#       """Create test configuration"""
-#       return FlowConfig(
-#           project_dir=str(temp_dir),
-#           log_dir="logs",
-#           conf_dir="conf",
-#           state_file=str(temp_dir / ".flow-ctrl.state.tmp"),
-#           report_file=str(temp_dir / ".flow-ctrl.report.tmp"),
-#           log_file="test-flow-ctrl.log",
-#           log_name="TestFlowCTRL",
-#           silence=True,
-#           debug=True
-#       )
-
-
-#   @pytest.fixture
-#   def mock_shell_executor():
-#       """Mock shell executor for testing"""
-#       mock_executor = Mock()
-#       mock_executor.execute.return_value = Mock(stdout="test output", stderr="", exit_code=0)
-#       mock_executor.execute_with_timeout.return_value = Mock(stdout="test output", stderr="", exit_code=0)
-#       mock_executor.check_command_exists.return_value = True
-#       return mock_executor

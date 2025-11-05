@@ -117,13 +117,41 @@ class FlowCLI:
         # Create engine
         self.engine = FlowEngine(self.config)
 
-    # @pysnooper.snoop()
+    def send_external_command(self, command: str) -> bool:
+        """Send a command to a running Flow-CTRL process"""
+        if not self.engine:
+            ConsoleOutput.error("Engine not initialized")
+            return False
+
+        return self.engine.send_external_command(command)
+
+    def run_external_control(self, args):
+        """Run in external control mode"""
+        if args.pause:
+            ConsoleOutput.info("Sending PAUSE command to running process...")
+            return self.send_external_command("pause")
+        elif args.resume:
+            ConsoleOutput.info("Sending RESUME command to running process...")
+            return self.send_external_command("resume")
+        elif args.stop:
+            ConsoleOutput.info("Sending STOP command to running process...")
+            return self.send_external_command("stop")
+        else:
+            ConsoleOutput.error("No external command specified")
+            return False
+
     def run(self):
         """Run the CLI"""
-
         args = self.parse_arguments()
 
-        # Setup engine
+        # Check if this is an external control command
+        if any([args.pause, args.resume, args.stop]) and not args.start:
+            # External control mode - don't start engine fully, just send command
+            self.setup_engine(args)
+            success = self.run_external_control(args)
+            sys.exit(0 if success else 1)
+
+        # Normal execution mode
         self.setup_engine(args)
 
         # Execute requested actions

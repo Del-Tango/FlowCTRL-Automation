@@ -250,16 +250,46 @@ function install() {
     return $?
 }
 
-# TODO
 function publish() {
-    echo "[ PUBLISH ]: To pypi..."
+    echo "[ PUBLISH ]: To PyPI..."
     echo "[ WARNING ]: Publishing currently disabled for this project."
-#   # Env vars for twine to publish packages
-#   export TWINE_USERNAME=
-#   export TWINE_PASSWORD=
-#   export TWINE_REPOSITORY_URL=
-#   twine upload "${DISTRIBUTION_DIR}/*" --verbose
-    return $?
+#   # Check if distribution files exist
+#   if [ ! -d "${DISTRIBUTION_DIR}" ] || [ -z "$(ls -A ${DISTRIBUTION_DIR}/*.whl 2>/dev/null)" ]; then
+#       echo "[ ERROR ]: No distribution files found. Run build first."
+#       return 1
+#   fi
+#   # Check if Twine is available
+#   if ! command -v twine &> /dev/null; then
+#       echo "[ ERROR ]: Twine not found. Install with: pip install twine"
+#       return 1
+#   fi
+#   # Check for required environment variables
+#   if [[ -z "${TWINE_USERNAME}" || -z "${TWINE_PASSWORD}" ]]; then
+#       echo "[ WARNING ]: TWINE_USERNAME or TWINE_PASSWORD environment variables not set."
+#       echo "[ INFO ]: You can set these variables or twine will prompt for credentials."
+
+#       if [[ "${YES}" != 'on' ]]; then
+#           read -p "Continue with manual authentication? [Y/N]> " ANSWER
+#           if [[ "${ANSWER}" != 'y' && "${ANSWER}" != 'Y' ]]; then
+#               echo "[ INFO ]: Publishing cancelled."
+#               return 0
+#           fi
+#       fi
+#   fi
+#   # Upload to PyPI
+#   echo "[ ... ]: Uploading distributions to PyPI..."
+#   if [[ -n "${TWINE_REPOSITORY_URL}" ]]; then
+#       twine upload --repository-url "${TWINE_REPOSITORY_URL}" "${DISTRIBUTION_DIR}"/* --verbose
+#   else
+#       twine upload "${DISTRIBUTION_DIR}"/* --verbose
+#   fi
+#   local EXIT_CODE=$?
+#   if [ $UPLOAD_RESULT -eq 0 ]; then
+#       echo "[ OK ]: Package successfully published to PyPI!"
+#   else
+#       echo "[ NOK ]: Failed to publish package to PyPI."
+#   fi
+    return $EXIT_CODE
 }
 
 # INIT

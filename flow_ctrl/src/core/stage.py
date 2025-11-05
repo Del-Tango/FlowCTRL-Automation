@@ -9,6 +9,7 @@ from dataclasses import dataclass
 
 from .action import Action
 from ..utils.state_manager import StateManager
+from ..utils.logger import ConsoleOutput
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +18,10 @@ logger = logging.getLogger(__name__)
 class StageStats:
     """Stage execution statistics"""
 
-    total_actions: int
-    completed_actions: int
-    success_count: int
-    failure_count: int
+    total_actions: int = 0
+    completed_actions: int = 0
+    success_count: int = 0
+    failure_count: int = 0
 
 
 class Stage:
@@ -47,6 +48,7 @@ class Stage:
 
     def execute(self) -> bool:
         """Execute all actions in the stage"""
+        ConsoleOutput.info(f'Executing Procedure Stage: {self.name}')
         logger.info(f"Executing stage: {self.name}")
 
         try:
