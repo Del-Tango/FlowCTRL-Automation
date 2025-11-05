@@ -69,7 +69,7 @@ class Action:
 
     def execute(self) -> bool:
         """Execute the action with all associated commands"""
-        ConsoleOutput.info(f'Executing Procedure Stage Action: {self.name}')
+        ConsoleOutput.info(f"Executing Procedure Stage Action: {self.name}")
         logger.info(f"Executing action: {self.name}")
 
         try:

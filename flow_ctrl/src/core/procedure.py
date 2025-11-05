@@ -34,7 +34,10 @@ class Procedure:
     def __init__(self, data: Dict[str, Any], config, sketch_file=None):
         self.data = data
         self.config = config
-        self.name = data.get("name", 'Unamed procedure' if not sketch_file else os.path.basename(sketch_file))
+        self.name = data.get(
+            "name",
+            "Unamed procedure" if not sketch_file else os.path.basename(sketch_file),
+        )
         self.stages: List[Stage] = []
         self.state_manager = StateManager(config.state_file)
         self.stats = ProcedureStats(0, 0, 0, 0, 0, 0)
@@ -81,7 +84,9 @@ class Procedure:
 
                     # Check if we should continue on failure
                     if not self._should_continue_on_failure():
-                        logger.error(f"Condition fatal after stage {stage.name} failure! Terminating")
+                        logger.error(
+                            f"Condition fatal after stage {stage.name} failure! Terminating"
+                        )
                         return False
 
             # Final cleanup
@@ -92,8 +97,10 @@ class Procedure:
             logger.info(f"Procedure completed: {status}")
 
             # Log detailed statistics
-            logger.info(f"Procedure statistics: {self.stats.completed_stages}/{self.stats.total_stages} stages completed, "
-                       f"{self.stats.success_count} successes, {self.stats.failure_count} failures")
+            logger.info(
+                f"Procedure statistics: {self.stats.completed_stages}/{self.stats.total_stages} stages completed, "
+                f"{self.stats.success_count} successes, {self.stats.failure_count} failures"
+            )
 
             return success
 
@@ -110,7 +117,9 @@ class Procedure:
         """Determine if procedure should continue after failure"""
         # Check if we've exceeded maximum allowed failures
         if self.max_failures > 0 and self.failure_count >= self.max_failures:
-            logger.warning(f"Maximum failures ({self.max_failures}) reached, terminating procedure")
+            logger.warning(
+                f"Maximum failures ({self.max_failures}) reached, terminating procedure"
+            )
             return False
 
         # Return the procedure-level configuration
@@ -151,13 +160,16 @@ class Procedure:
 
             # Use ShellExecutor to execute the command
             from ..utils.shell import ShellExecutor
+
             executor = ShellExecutor()
             result = executor.execute(command)
 
             if result.exit_code == 0:
                 logger.info(f"Cleanup command '{cmd_name}' completed successfully")
             else:
-                logger.warning(f"Cleanup command '{cmd_name}' failed with exit code {result.exit_code}")
+                logger.warning(
+                    f"Cleanup command '{cmd_name}' failed with exit code {result.exit_code}"
+                )
 
         except Exception as e:
             logger.error(f"Error executing cleanup command: {e}")
@@ -166,9 +178,11 @@ class Procedure:
         """Get current execution progress"""
         return {
             "name": self.name,
-            "current_stage": self.state_manager.get_state_field(2)
-            if self.state_manager.get_state()
-            else None,
+            "current_stage": (
+                self.state_manager.get_state_field(2)
+                if self.state_manager.get_state()
+                else None
+            ),
             "stats": {
                 "total_stages": self.stats.total_stages,
                 "completed_stages": self.stats.completed_stages,

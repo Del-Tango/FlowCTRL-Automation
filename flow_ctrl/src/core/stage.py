@@ -48,7 +48,7 @@ class Stage:
 
     def execute(self) -> bool:
         """Execute all actions in the stage"""
-        ConsoleOutput.info(f'Executing Procedure Stage: {self.name}')
+        ConsoleOutput.info(f"Executing Procedure Stage: {self.name}")
         logger.info(f"Executing stage: {self.name}")
 
         try:
@@ -85,9 +85,11 @@ class Stage:
         """Get current stage progress"""
         return {
             "name": self.name,
-            "current_action": self.state_manager.get_state_field(3)
-            if self.state_manager.get_state()
-            else None,
+            "current_action": (
+                self.state_manager.get_state_field(3)
+                if self.state_manager.get_state()
+                else None
+            ),
             "stats": {
                 "total_actions": self.stats.total_actions,
                 "completed_actions": self.stats.completed_actions,

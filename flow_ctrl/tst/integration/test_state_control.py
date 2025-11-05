@@ -147,7 +147,10 @@ class TestStateControl:
 
         # Verify the result
         assert wait_result[0] is not None, "Wait thread did not complete"
-        assert "stopped" in wait_result[0].lower(), f"Expected 'stopped' in result, got: {wait_result[0]}"
+        assert (
+            "stopped" in wait_result[0].lower()
+        ), f"Expected 'stopped' in result, got: {wait_result[0]}"
+
 
 # CODE DUMP
 
@@ -211,4 +214,3 @@ class TestStateControl:
 #       assert execution_result[0] is not None
 #       assert execution_result[0].success is False
 #       assert "stopped" in execution_result[0].message.lower()
-

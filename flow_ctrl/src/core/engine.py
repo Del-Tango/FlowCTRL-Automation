@@ -109,7 +109,7 @@ class FlowEngine:
 
     def load_procedure(self, sketch_file: str) -> bool:
         """Load a procedure from sketch file"""
-        ConsoleOutput.info(f'Loading sketch file: {sketch_file}')
+        ConsoleOutput.info(f"Loading sketch file: {sketch_file}")
         try:
             sketch_path = Path(sketch_file)
             if not sketch_path.exists():
@@ -139,13 +139,11 @@ class FlowEngine:
 
     def start_procedure(self) -> ExecutionResult:
         """Start procedure execution with state monitoring"""
-        ConsoleOutput.info('Starting procedure execution with state monitoring')
+        ConsoleOutput.info("Starting procedure execution with state monitoring")
         if not self.current_procedure:
             msg = "No procedure loaded"
             ConsoleOutput.error(msg)
-            return ExecutionResult(
-                success=False, message=msg, exit_code=1, details={}
-            )
+            return ExecutionResult(success=False, message=msg, exit_code=1, details={})
 
         # Get current state and previous action for validation
         current_state = self.state_manager.get_state()
@@ -171,14 +169,16 @@ class FlowEngine:
 
             self.state_manager.set_state(True, "started")
             ConsoleOutput.info("Procedure state set to STARTED")
-            ConsoleOutput.info("State monitoring active - process can be controlled externally")
+            ConsoleOutput.info(
+                "State monitoring active - process can be controlled externally"
+            )
             logger.info("Starting procedure execution with state monitoring")
 
             # Modified execution that respects pause/stop commands
             success = self._execute_with_control()
 
             if success:
-                message = 'Procedure finalized successfuly!'
+                message = "Procedure finalized successfuly!"
                 exit_code = 0
             else:
                 if self.execution_stopped:
@@ -217,7 +217,9 @@ class FlowEngine:
         try:
             ConsoleOutput.info("Beginning controlled procedure execution...")
 
-            if not self.current_procedure or not hasattr(self.current_procedure, 'stages'):
+            if not self.current_procedure or not hasattr(
+                self.current_procedure, "stages"
+            ):
                 ConsoleOutput.error("No valid procedure to execute")
                 return False
 
@@ -225,10 +227,12 @@ class FlowEngine:
             self.current_procedure.stats = ProcedureStats(
                 total_stages=len(self.current_procedure.stages),
                 completed_stages=0,
-                total_actions=sum(len(stage.actions) for stage in self.current_procedure.stages),
+                total_actions=sum(
+                    len(stage.actions) for stage in self.current_procedure.stages
+                ),
                 completed_actions=0,
                 success_count=0,
-                failure_count=0
+                failure_count=0,
             )
 
             for stage in self.current_procedure.stages:
@@ -254,10 +258,15 @@ class FlowEngine:
                     ConsoleOutput.nok(f"Stage failed: {stage.name}")
 
                     if not self._should_continue_on_stage_failure():
-                        ConsoleOutput.error(f"Stage failed, terminating procedure: {stage.name}")
+                        ConsoleOutput.error(
+                            f"Stage failed, terminating procedure: {stage.name}"
+                        )
                         return False
 
-            success = self.current_procedure.stats.failure_count == 0 and not self.execution_stopped
+            success = (
+                self.current_procedure.stats.failure_count == 0
+                and not self.execution_stopped
+            )
             if success:
                 ConsoleOutput.ok("Procedure completed: SUCCESS")
             elif self.execution_stopped:
@@ -274,7 +283,7 @@ class FlowEngine:
     def _execute_stage_with_control(self, stage) -> bool:
         """Execute a single stage with pause/stop control"""
         try:
-            if not hasattr(stage, 'actions'):
+            if not hasattr(stage, "actions"):
                 ConsoleOutput.error(f"Stage {stage.name} has no actions")
                 return False
 
@@ -283,7 +292,7 @@ class FlowEngine:
                 total_actions=len(stage.actions),
                 completed_actions=0,
                 success_count=0,
-                failure_count=0
+                failure_count=0,
             )
 
             for action in stage.actions:
@@ -309,7 +318,9 @@ class FlowEngine:
                     ConsoleOutput.nok(f"Action failed: {action.name}")
 
                     if not self._should_continue_on_action_failure(action):
-                        ConsoleOutput.error(f"Action failed, terminating stage: {action.name}")
+                        ConsoleOutput.error(
+                            f"Action failed, terminating stage: {action.name}"
+                        )
                         return False
 
             return stage.stats.failure_count == 0
@@ -320,7 +331,7 @@ class FlowEngine:
 
     def pause_procedure(self) -> ExecutionResult:
         """Pause current procedure - can be called externally"""
-        ConsoleOutput.info('Pausing procedure')
+        ConsoleOutput.info("Pausing procedure")
         current_state = self.state_manager.get_state()
         previous_action = self.state_manager.get_state_field(0) or ""
 
@@ -346,7 +357,7 @@ class FlowEngine:
 
     def resume_procedure(self) -> ExecutionResult:
         """Resume paused procedure - can be called externally"""
-        ConsoleOutput.info('Resuming procedure')
+        ConsoleOutput.info("Resuming procedure")
         current_state = self.state_manager.get_state()
         previous_action = self.state_manager.get_state_field(0) or ""
 
@@ -372,7 +383,7 @@ class FlowEngine:
 
     def stop_procedure(self) -> ExecutionResult:
         """Stop current procedure - can be called externally"""
-        ConsoleOutput.info('Stopping procedure')
+        ConsoleOutput.info("Stopping procedure")
         current_state = self.state_manager.get_state()
         previous_action = self.state_manager.get_state_field(0) or ""
 
@@ -404,7 +415,7 @@ class FlowEngine:
 
     def purge_data(self) -> ExecutionResult:
         """Purge all state and report data"""
-        ConsoleOutput.info('Purging all state and report data')
+        ConsoleOutput.info("Purging all state and report data")
         try:
             # Stop monitoring if running
             self.state_monitor.stop_monitoring()
@@ -435,8 +446,9 @@ class FlowEngine:
     def _should_continue_on_stage_failure(self) -> bool:
         """Determine if execution should continue after stage failure"""
         # Check procedure-level configuration if available
-        if (self.current_procedure and
-            hasattr(self.current_procedure, '_should_continue_on_failure')):
+        if self.current_procedure and hasattr(
+            self.current_procedure, "_should_continue_on_failure"
+        ):
             return self.current_procedure._should_continue_on_failure()
 
         # Default behavior: continue unless explicitly configured to stop
@@ -446,16 +458,17 @@ class FlowEngine:
     def _should_continue_on_action_failure(self, action) -> bool:
         """Determine if stage should continue after action failure"""
         # First check if action is marked as fatal
-        if getattr(action, 'fatal_nok', False):
+        if getattr(action, "fatal_nok", False):
             return False
 
         # Then check procedure-level configuration
-        if (self.current_procedure and
-            hasattr(self.current_procedure, '_should_continue_on_failure')):
+        if self.current_procedure and hasattr(
+            self.current_procedure, "_should_continue_on_failure"
+        ):
             return self.current_procedure._should_continue_on_failure()
 
         # Default: continue on action failure
         return True
 
-# CODE DUMP
 
+# CODE DUMP

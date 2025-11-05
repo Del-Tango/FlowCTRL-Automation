@@ -76,9 +76,15 @@ class StateManager:
             # Update only action and timestamp, preserve other fields
             state_record = [
                 action,  # Current action (field 0)
-                current_state[1] if len(current_state) > 1 else "",  # Sketch file (field 1)
-                current_state[2] if len(current_state) > 2 else "",  # Current stage (field 2)
-                current_state[3] if len(current_state) > 3 else "",  # Current action (field 3)
+                (
+                    current_state[1] if len(current_state) > 1 else ""
+                ),  # Sketch file (field 1)
+                (
+                    current_state[2] if len(current_state) > 2 else ""
+                ),  # Current stage (field 2)
+                (
+                    current_state[3] if len(current_state) > 3 else ""
+                ),  # Current action (field 3)
                 datetime.now().isoformat(),  # Timestamp (field 4)
             ]
 
@@ -97,9 +103,15 @@ class StateManager:
             # Create command record preserving existing context
             command_record = [
                 command,  # Command as action (field 0)
-                current_state[1] if len(current_state) > 1 else "",  # Preserve sketch file
-                current_state[2] if len(current_state) > 2 else "",  # Preserve current stage
-                current_state[3] if len(current_state) > 3 else "",  # Preserve current action
+                (
+                    current_state[1] if len(current_state) > 1 else ""
+                ),  # Preserve sketch file
+                (
+                    current_state[2] if len(current_state) > 2 else ""
+                ),  # Preserve current stage
+                (
+                    current_state[3] if len(current_state) > 3 else ""
+                ),  # Preserve current action
                 datetime.now().isoformat(),  # Update timestamp
             ]
 
@@ -185,5 +197,5 @@ class StateManager:
             logger.error(f"Error purging state: {e}")
             return False
 
-# CODE DUMP
 
+# CODE DUMP
