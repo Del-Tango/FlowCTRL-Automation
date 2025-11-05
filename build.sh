@@ -382,5 +382,4 @@ fi
 exit $EXIT_CODE
 
 # CODE DUMP
-#PARENT_DIR=$(basename $(dirname `realpath ./module.py`))
 

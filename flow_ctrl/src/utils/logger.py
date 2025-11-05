@@ -79,9 +79,7 @@ def setup_logging(
 
     # File handler - always create this
     file_handler = logging.handlers.RotatingFileHandler(
-        log_file,
-        maxBytes=10 * 1024 * 1024,  # 10MB per file
-        backupCount=5  # 5 backups
+        log_file, maxBytes=10 * 1024 * 1024, backupCount=5  # 10MB per file  # 5 backups
     )
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
@@ -102,4 +100,3 @@ def get_logger(name: str) -> logging.Logger:
     return logging.getLogger(name)
 
 # CODE DUMP
-

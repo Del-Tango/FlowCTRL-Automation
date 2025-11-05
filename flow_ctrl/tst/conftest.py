@@ -5,6 +5,7 @@ Pytest configuration and shared fixtures
 import pytest
 import tempfile
 import json
+
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -135,6 +136,4 @@ def cleanup_temp_files():
     yield
     # Teardown - any additional cleanup
 
-
 # CODE DUMP
-

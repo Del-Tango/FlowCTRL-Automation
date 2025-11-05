@@ -4,13 +4,15 @@ Command-line interface for Flow-CTRL
 
 import argparse
 import sys
+import json
+import yaml
 import pysnooper
 
 from pathlib import Path
 from typing import Optional
 
 from ..core.engine import FlowEngine
-from ..config.settings import DEFAULT_CONFIG
+from ..config.settings import DEFAULT_CONFIG, FlowConfig
 from ..utils.logger import ConsoleOutput
 
 
@@ -33,14 +35,15 @@ class FlowCLI:
 [ EXAMPLE ]:
 
     ~$ flow_ctrl --start --sketch-file automate_me.json
-    ~$ flow_ctrl --purge --start --sketch-file automate_me.json
-    ~$ flow_ctrl --pause
+    ~$ flow_ctrl --purge --start --sketch-file automate_me.json --config-file config.yaml
+    ~$ flow_ctrl --pause --config-file custom_config.json
     ~$ flow_ctrl --resume
     ~$ flow_ctrl --stop
 
 [ EXAMPLE ]: Procedure sketch JSON format:
 
 {
+    "name": Procedure_ID,
     "Stage_ID": [
         {
             "name": "Action_ID",
@@ -64,7 +67,10 @@ class FlowCLI:
             help="Path to JSON sketch file containing procedure",
         )
         parser.add_argument(
-            "--config-file", "-c", type=str, help="Path to configuration file"
+            "--config-file",
+            "-c",
+            type=str,
+            help="Path to configuration file (JSON/YAML)",
         )
         parser.add_argument("--log-file", "-l", type=str, help="Path to log file")
 
@@ -99,12 +105,71 @@ class FlowCLI:
 
         return parser.parse_args()
 
+    def load_config_from_file(self, config_file: str) -> Optional[FlowConfig]:
+        """
+        Load configuration from JSON or YAML file
+
+        Args:
+            config_file: Path to configuration file
+
+        Returns:
+            FlowConfig instance or None if loading fails
+        """
+        try:
+            config_path = Path(config_file)
+            if not config_path.exists():
+                ConsoleOutput.error(f"Configuration file not found: {config_file}")
+                return None
+
+            with open(config_path, "r") as f:
+                if config_path.suffix.lower() in [".yaml", ".yml"]:
+                    config_data = yaml.safe_load(f)
+                else:
+                    # Assume JSON for .json or any other extension
+                    config_data = json.load(f)
+
+            ConsoleOutput.info(f"Loading configuration from: {config_file}")
+
+            # Create FlowConfig with loaded data, using defaults for missing values
+            return FlowConfig(
+                project_dir=config_data.get("project_dir", self.config.project_dir),
+                log_dir=config_data.get("log_dir", self.config.log_dir),
+                conf_dir=config_data.get("conf_dir", self.config.conf_dir),
+                state_file=config_data.get("state_file", self.config.state_file),
+                report_file=config_data.get("report_file", self.config.report_file),
+                log_file=config_data.get("log_file", self.config.log_file),
+                log_name=config_data.get("log_name", self.config.log_name),
+                silence=config_data.get("silence", self.config.silence),
+                debug=config_data.get("debug", self.config.debug),
+                log_format=config_data.get("log_format", self.config.log_format),
+                timestamp_format=config_data.get(
+                    "timestamp_format", self.config.timestamp_format
+                ),
+            )
+
+        except yaml.YAMLError as e:
+            ConsoleOutput.error(f"Invalid YAML in configuration file: {e}")
+            return None
+        except json.JSONDecodeError as e:
+            ConsoleOutput.error(f"Invalid JSON in configuration file: {e}")
+            return None
+        except Exception as e:
+            ConsoleOutput.error(f"Error loading configuration file: {e}")
+            return None
+
     def setup_engine(self, args):
         """Setup the flow engine with configuration"""
-        # Update config based on arguments
+        # Load configuration from file if specified
         if args.config_file:
-            self.config.conf_dir = str(Path(args.config_file).parent)
+            file_config = self.load_config_from_file(args.config_file)
+            if file_config:
+                self.config = file_config
+                ConsoleOutput.ok("Configuration loaded from file")
+            else:
+                ConsoleOutput.error("Failed to load configuration file, using defaults")
+                # Continue with default config
 
+        # Override with command line arguments (higher priority)
         if args.log_file:
             self.config.log_file = args.log_file
 
@@ -231,3 +296,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# CODE DUMP

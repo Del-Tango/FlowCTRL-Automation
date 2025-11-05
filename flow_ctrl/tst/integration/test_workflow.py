@@ -5,6 +5,7 @@ Integration tests for complete workflows
 import pytest
 import tempfile
 import json
+
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -131,4 +132,3 @@ class TestWorkflowIntegration:
         assert state2["action"] == "testing"
 
 # CODE DUMP
-

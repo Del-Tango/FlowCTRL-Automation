@@ -138,4 +138,3 @@ class TestConsoleOutput:
         ConsoleOutput.banner("Test Banner")
         captured = capsys.readouterr()
         assert "Test Banner" in captured.out
-
