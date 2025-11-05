@@ -1,4 +1,3 @@
-# ./flow_ctrl/src/core/engine.py
 """
 Main Flow-CTRL engine coordinating procedure execution with state monitoring
 """
@@ -469,6 +468,5 @@ class FlowEngine:
 
         # Default: continue on action failure
         return True
-
 
 # CODE DUMP

@@ -1,0 +1,11 @@
+project_dir: flow_ctrl
+log_dir: /tmp/flow_ctrl
+conf_dir: /etc/flow_ctrl
+state_file: /tmp/.flow_ctrl.state
+report_file: /tmp/.flow_ctrl.report
+log_file: flow_ctrl.log
+log_name: FlowCTRL
+silence: false
+debug: true
+log_format: "%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s"
+timestamp_format: "%Y-%m-%d %H:%M:%S"

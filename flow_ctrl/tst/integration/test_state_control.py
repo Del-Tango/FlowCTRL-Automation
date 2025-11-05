@@ -1,4 +1,3 @@
-# ./flow_ctrl/tst/integration/test_state_control.py
 """
 Integration tests for state-based inter-process control
 """
@@ -8,6 +7,7 @@ import tempfile
 import json
 import time
 import threading
+
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 

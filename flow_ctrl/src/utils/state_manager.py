@@ -1,10 +1,10 @@
-# ./flow_ctrl/src/utils/state_manager.py
 """
 State management for procedure execution with command support
 """
 
 import csv
 import logging
+
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime
@@ -196,6 +196,5 @@ class StateManager:
         except Exception as e:
             logger.error(f"Error purging state: {e}")
             return False
-
 
 # CODE DUMP

@@ -5,6 +5,7 @@ Integration tests for complete workflows
 import pytest
 import tempfile
 import json
+
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -129,6 +130,5 @@ class TestWorkflowIntegration:
         state2 = engine2.state_manager.get_full_state()
         assert state2["active"] is True
         assert state2["action"] == "testing"
-
 
 # CODE DUMP

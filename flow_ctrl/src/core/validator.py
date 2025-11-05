@@ -140,5 +140,4 @@ class Validator:
             logger.error(f"Error validating sketch file: {e}")
             return False
 
-
 # CODE DUMP
