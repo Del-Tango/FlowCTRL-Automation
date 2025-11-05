@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class StageStats:
     """Stage execution statistics"""
+
     total_actions: int
     completed_actions: int
     success_count: int
@@ -73,7 +74,7 @@ class Stage:
             logger.error(f"Stage execution error: {e}")
             return False
 
-    def _should_continue_on_failure(self, action: 'Action') -> bool:
+    def _should_continue_on_failure(self, action: "Action") -> bool:
         """Determine if stage should continue after action failure"""
         # Check if action is marked as fatal
         return not action.fatal_nok
@@ -81,12 +82,14 @@ class Stage:
     def get_progress(self) -> Dict[str, Any]:
         """Get current stage progress"""
         return {
-            'name': self.name,
-            'current_action': self.state_manager.get_state_field(3) if self.state_manager.get_state() else None,
-            'stats': {
-                'total_actions': self.stats.total_actions,
-                'completed_actions': self.stats.completed_actions,
-                'success_count': self.stats.success_count,
-                'failure_count': self.stats.failure_count
-            }
+            "name": self.name,
+            "current_action": self.state_manager.get_state_field(3)
+            if self.state_manager.get_state()
+            else None,
+            "stats": {
+                "total_actions": self.stats.total_actions,
+                "completed_actions": self.stats.completed_actions,
+                "success_count": self.stats.success_count,
+                "failure_count": self.stats.failure_count,
+            },
         }

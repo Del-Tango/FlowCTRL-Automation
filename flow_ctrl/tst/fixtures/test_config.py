@@ -31,9 +31,9 @@ def create_test_config(temp_dir: Path = None) -> FlowConfig:
         log_file="test-flow-ctrl.log",
         log_name="TestFlowCTRL",
         silence=True,  # Suppress output during tests
-        debug=True,    # Enable debug logging for tests
-        log_format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        timestamp_format='%H:%M:%S'
+        debug=True,  # Enable debug logging for tests
+        log_format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        timestamp_format="%H:%M:%S",
     )
 
 
@@ -51,17 +51,17 @@ def create_mock_config(**overrides) -> Mock:
 
     # Default values
     default_values = {
-        'project_dir': '/tmp/test_project',
-        'log_dir': 'logs',
-        'conf_dir': 'conf',
-        'state_file': '/tmp/.flow-ctrl.test.state',
-        'report_file': '/tmp/.flow-ctrl.test.report',
-        'log_file': 'test.log',
-        'log_name': 'TestFlowCTRL',
-        'silence': True,
-        'debug': True,
-        'log_format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        'timestamp_format': '%H:%M:%S'
+        "project_dir": "/tmp/test_project",
+        "log_dir": "logs",
+        "conf_dir": "conf",
+        "state_file": "/tmp/.flow-ctrl.test.state",
+        "report_file": "/tmp/.flow-ctrl.test.report",
+        "log_file": "test.log",
+        "log_name": "TestFlowCTRL",
+        "silence": True,
+        "debug": True,
+        "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        "timestamp_format": "%H:%M:%S",
     }
 
     # Apply defaults and overrides
@@ -93,9 +93,9 @@ class TestConfigFactory:
             log_file="flow-ctrl.log",
             log_name="FlowCTRL",
             silence=False,  # Production shows output
-            debug=False,    # Production uses INFO level
-            log_format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            timestamp_format='%Y-%m-%d %H:%M:%S'
+            debug=False,  # Production uses INFO level
+            log_format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            timestamp_format="%Y-%m-%d %H:%M:%S",
         )
 
     @staticmethod
@@ -112,8 +112,8 @@ class TestConfigFactory:
             log_name="DebugFlowCTRL",
             silence=False,
             debug=True,  # Debug mode enabled
-            log_format='%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s',
-            timestamp_format='%H:%M:%S'
+            log_format="%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s",
+            timestamp_format="%H:%M:%S",
         )
 
 
@@ -134,8 +134,15 @@ def validate_test_config(config: FlowConfig) -> bool:
         bool: True if configuration is valid
     """
     required_fields = [
-        'project_dir', 'log_dir', 'conf_dir', 'state_file',
-        'report_file', 'log_file', 'log_name', 'silence', 'debug'
+        "project_dir",
+        "log_dir",
+        "conf_dir",
+        "state_file",
+        "report_file",
+        "log_file",
+        "log_name",
+        "silence",
+        "debug",
     ]
 
     for field in required_fields:
@@ -165,6 +172,7 @@ def cleanup_test_config(config: FlowConfig):
 
     # Clean up log directory if it's in temp
     log_dir = Path(config.project_dir) / config.log_dir
-    if log_dir.exists() and str(log_dir).startswith('/tmp'):
+    if log_dir.exists() and str(log_dir).startswith("/tmp"):
         import shutil
+
         shutil.rmtree(log_dir, ignore_errors=True)

@@ -30,20 +30,20 @@ class StateManager:
         try:
             if not active:
                 # Clear state file when deactivating
-                self.state_file.write_text('')
+                self.state_file.write_text("")
                 logger.debug("State cleared")
                 return True
 
             # Create state record
             state_record = [
-                action,                    # Current action
-                '',                        # Sketch file
-                '',                        # Current stage
-                '',                        # Current action
-                datetime.now().isoformat() # Timestamp
+                action,  # Current action
+                "",  # Sketch file
+                "",  # Current stage
+                "",  # Current action
+                datetime.now().isoformat(),  # Timestamp
             ]
 
-            self.state_file.write_text(','.join(state_record))
+            self.state_file.write_text(",".join(state_record))
             logger.debug(f"State set to: {action}")
             return True
 
@@ -65,7 +65,7 @@ class StateManager:
             if not content:
                 return None
 
-            fields = content.split(',')
+            fields = content.split(",")
             if field_index < len(fields):
                 return fields[field_index]
             else:
@@ -80,21 +80,21 @@ class StateManager:
         try:
             if not self.get_state():
                 # Create new state record if none exists
-                state_record = [''] * 5
+                state_record = [""] * 5
             else:
                 # Read existing state
                 content = self.state_file.read_text().strip()
-                state_record = content.split(',')
+                state_record = content.split(",")
                 # Ensure we have enough fields
                 while len(state_record) < 5:
-                    state_record.append('')
+                    state_record.append("")
 
             # Update the field
             state_record[field_index] = value
             # Always update timestamp
             state_record[4] = datetime.now().isoformat()
 
-            self.state_file.write_text(','.join(state_record))
+            self.state_file.write_text(",".join(state_record))
             logger.debug(f"State updated - field {field_index}: {value}")
             return True
 
@@ -105,23 +105,23 @@ class StateManager:
     def get_full_state(self) -> Dict[str, Any]:
         """Get complete state information"""
         if not self.get_state():
-            return {'active': False}
+            return {"active": False}
 
         try:
             content = self.state_file.read_text().strip()
-            fields = content.split(',')
+            fields = content.split(",")
 
             return {
-                'active': True,
-                'action': fields[0] if len(fields) > 0 else '',
-                'sketch_file': fields[1] if len(fields) > 1 else '',
-                'current_stage': fields[2] if len(fields) > 2 else '',
-                'current_action': fields[3] if len(fields) > 3 else '',
-                'timestamp': fields[4] if len(fields) > 4 else ''
+                "active": True,
+                "action": fields[0] if len(fields) > 0 else "",
+                "sketch_file": fields[1] if len(fields) > 1 else "",
+                "current_stage": fields[2] if len(fields) > 2 else "",
+                "current_action": fields[3] if len(fields) > 3 else "",
+                "timestamp": fields[4] if len(fields) > 4 else "",
             }
         except Exception as e:
             logger.error(f"Error reading full state: {e}")
-            return {'active': False, 'error': str(e)}
+            return {"active": False, "error": str(e)}
 
     def purge(self) -> bool:
         """Purge all state data"""

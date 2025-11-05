@@ -23,7 +23,7 @@ class TestAction:
             "on-nok-cmd": "echo 'on_nok'",
             "time": "5s",
             "timeout": "10s",
-            "fatal-nok": True
+            "fatal-nok": True,
         }
 
         action = Action(action_data, test_config)
@@ -59,7 +59,7 @@ class TestAction:
         assert valid_action.validate() is True
         assert invalid_action.validate() is False
 
-    @patch('flow_ctrl.src.core.action.ShellExecutor')
+    @patch("flow_ctrl.src.core.action.ShellExecutor")
     def test_execute_success(self, mock_shell_class, test_config):
         """Test successful action execution"""
         mock_shell = Mock()
@@ -71,7 +71,7 @@ class TestAction:
             "cmd": "echo 'test'",
             "setup-cmd": "echo 'setup'",
             "on-ok-cmd": "echo 'on_ok'",
-            "teardown-cmd": "echo 'teardown'"
+            "teardown-cmd": "echo 'teardown'",
         }
 
         action = Action(action_data, test_config)
@@ -80,7 +80,7 @@ class TestAction:
         assert result is True
         assert mock_shell.execute.call_count == 4  # setup, main, on-ok, teardown
 
-    @patch('flow_ctrl.src.core.action.ShellExecutor')
+    @patch("flow_ctrl.src.core.action.ShellExecutor")
     def test_execute_failure(self, mock_shell_class, test_config):
         """Test failed action execution"""
         mock_shell = Mock()
@@ -90,7 +90,7 @@ class TestAction:
         action_data = {
             "name": "test_action",
             "cmd": "echo 'test'",
-            "on-nok-cmd": "echo 'on_nok'"
+            "on-nok-cmd": "echo 'on_nok'",
         }
 
         action = Action(action_data, test_config)

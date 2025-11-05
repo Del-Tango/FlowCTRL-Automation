@@ -9,7 +9,11 @@ from pathlib import Path
 from unittest.mock import Mock
 
 from flow_ctrl.src.config.settings import FlowConfig, DEFAULT_CONFIG
-from flow_ctrl.tst.fixtures.test_config import create_test_config, create_mock_config, cleanup_test_config
+from flow_ctrl.tst.fixtures.test_config import (
+    create_test_config,
+    create_mock_config,
+    cleanup_test_config,
+)
 
 
 @pytest.fixture
@@ -54,8 +58,12 @@ def debug_config():
 def mock_shell_executor():
     """Mock shell executor for testing"""
     mock_executor = Mock()
-    mock_executor.execute.return_value = Mock(stdout="test output", stderr="", exit_code=0)
-    mock_executor.execute_with_timeout.return_value = Mock(stdout="test output", stderr="", exit_code=0)
+    mock_executor.execute.return_value = Mock(
+        stdout="test output", stderr="", exit_code=0
+    )
+    mock_executor.execute_with_timeout.return_value = Mock(
+        stdout="test output", stderr="", exit_code=0
+    )
     mock_executor.check_command_exists.return_value = True
     mock_executor.execute_detached.return_value = 0
     return mock_executor
@@ -71,9 +79,9 @@ def simple_sketch_file(temp_dir):
                 "name": "test_action",
                 "cmd": "echo 'Hello World'",
                 "time": "5s",
-                "timeout": "10s"
+                "timeout": "10s",
             }
-        ]
+        ],
     }
 
     sketch_file = temp_dir / "simple_sketch.json"
@@ -87,26 +95,14 @@ def multi_stage_sketch_file(temp_dir):
     sketch_data = {
         "name": "Multi-Stage Test",
         "setup_stage": [
-            {
-                "name": "create_test_dir",
-                "cmd": "mkdir -p /tmp/test_dir",
-                "time": "5s"
-            }
+            {"name": "create_test_dir", "cmd": "mkdir -p /tmp/test_dir", "time": "5s"}
         ],
         "main_stage": [
-            {
-                "name": "list_files",
-                "cmd": "ls -la /tmp/test_dir",
-                "time": "5s"
-            }
+            {"name": "list_files", "cmd": "ls -la /tmp/test_dir", "time": "5s"}
         ],
         "cleanup_stage": [
-            {
-                "name": "remove_test_dir",
-                "cmd": "rm -rf /tmp/test_dir",
-                "time": "5s"
-            }
-        ]
+            {"name": "remove_test_dir", "cmd": "rm -rf /tmp/test_dir", "time": "5s"}
+        ],
     }
 
     sketch_file = temp_dir / "multi_stage_sketch.json"
@@ -122,7 +118,7 @@ def invalid_sketch_file(temp_dir):
             {
                 "name": "invalid_action",
                 # Missing required 'cmd' field
-                "time": "invalid_time"
+                "time": "invalid_time",
             }
         ]
     }
@@ -138,6 +134,7 @@ def cleanup_temp_files():
     # Setup
     yield
     # Teardown - any additional cleanup can go here
+
 
 # CODE DUMP
 

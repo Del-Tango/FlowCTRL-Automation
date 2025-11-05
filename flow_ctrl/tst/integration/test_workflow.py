@@ -16,7 +16,7 @@ from flow_ctrl.tst.fixtures.sample_sketches import SIMPLE_SKETCH, MULTI_STAGE_SK
 class TestWorkflowIntegration:
     """Integration tests for complete workflows"""
 
-    @patch('flow_ctrl.src.core.engine.Procedure')
+    @patch("flow_ctrl.src.core.engine.Procedure")
     def test_simple_workflow_lifecycle(self, mock_procedure_class, temp_dir):
         """Test complete workflow lifecycle"""
         # Create test sketch
@@ -30,7 +30,7 @@ class TestWorkflowIntegration:
             report_file=str(temp_dir / "workflow.report"),
             log_file="workflow_test.log",
             silence=True,
-            debug=True
+            debug=True,
         )
 
         # Mock procedure
@@ -53,14 +53,14 @@ class TestWorkflowIntegration:
         state_file = Path(config.state_file)
         if state_file.exists() and state_file.stat().st_size > 0:
             # If there's content, state should be active
-            assert state['active'] is True
+            assert state["active"] is True
         else:
             # If no content or file doesn't exist, state should be inactive
-            assert state['active'] is False
+            assert state["active"] is False
 
         # Mock state for starting
         engine.state_manager.get_state = Mock(return_value=False)
-        engine.state_manager.get_state_field = Mock(return_value='')
+        engine.state_manager.get_state_field = Mock(return_value="")
 
         # Start procedure
         start_result = engine.start_procedure()
@@ -77,7 +77,7 @@ class TestWorkflowIntegration:
             report_file=str(temp_dir / "multi_workflow.report"),
             log_file="multi_workflow_test.log",
             silence=True,
-            debug=True
+            debug=True,
         )
 
         engine = FlowEngine(config)
@@ -105,7 +105,7 @@ class TestWorkflowIntegration:
             report_file=str(temp_dir / "persistent.report"),
             log_file="persistent_test.log",
             silence=True,
-            debug=True
+            debug=True,
         )
 
         # First engine instance
@@ -119,18 +119,19 @@ class TestWorkflowIntegration:
 
         # Verify state
         state1 = engine1.state_manager.get_full_state()
-        assert state1['active'] is True
-        assert state1['action'] == "testing"
-        assert state1['sketch_file'] == str(sketch_file)
-        assert state1['current_stage'] == "test_stage"
+        assert state1["active"] is True
+        assert state1["action"] == "testing"
+        assert state1["sketch_file"] == str(sketch_file)
+        assert state1["current_stage"] == "test_stage"
 
         # Create second engine instance (simulating restart)
         engine2 = FlowEngine(config)
 
         # Verify state persistence
         state2 = engine2.state_manager.get_full_state()
-        assert state2['active'] is True
-        assert state2['action'] == "testing"
+        assert state2["active"] is True
+        assert state2["action"] == "testing"
+
 
 # CODE DUMP
 

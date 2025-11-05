@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CommandResult:
     """Result of command execution"""
+
     success: bool
     stdout: str
     stderr: str
@@ -32,15 +33,15 @@ class Action:
     def __init__(self, data: Dict[str, Any], config):
         self.data = data
         self.config = config
-        self.name = data.get('name', 'Unnamed Action')
-        self.command = data.get('cmd', '')
-        self.setup_command = data.get('setup-cmd', '')
-        self.teardown_command = data.get('teardown-cmd', '')
-        self.on_ok_command = data.get('on-ok-cmd', '')
-        self.on_nok_command = data.get('on-nok-cmd', '')
-        self.fatal_nok = data.get('fatal-nok', False)
-        self.timeout = self._parse_time(data.get('timeout', ''))
-        self.estimated_time = self._parse_time(data.get('time', ''))
+        self.name = data.get("name", "Unnamed Action")
+        self.command = data.get("cmd", "")
+        self.setup_command = data.get("setup-cmd", "")
+        self.teardown_command = data.get("teardown-cmd", "")
+        self.on_ok_command = data.get("on-ok-cmd", "")
+        self.on_nok_command = data.get("on-nok-cmd", "")
+        self.fatal_nok = data.get("fatal-nok", False)
+        self.timeout = self._parse_time(data.get("timeout", ""))
+        self.estimated_time = self._parse_time(data.get("time", ""))
 
         # FIX: Remove non-existent handler
         # self.handler = ActionHandler(config)
@@ -87,11 +88,15 @@ class Action:
 
             # Execute teardown command
             if self.teardown_command:
-                teardown_result = self._execute_command(self.teardown_command, "teardown")
+                teardown_result = self._execute_command(
+                    self.teardown_command, "teardown"
+                )
                 if not teardown_result.success:
                     logger.warning(f"Teardown command failed for action: {self.name}")
 
-            logger.info(f"Action completed: {self.name} - {'SUCCESS' if main_result.success else 'FAILED'}")
+            logger.info(
+                f"Action completed: {self.name} - {'SUCCESS' if main_result.success else 'FAILED'}"
+            )
             return main_result.success
 
         except Exception as e:
@@ -116,9 +121,13 @@ class Action:
             execution_time = time.time() - start_time
 
             if result.exit_code == 0:
-                logger.info(f"{command_type} command succeeded in {execution_time:.2f}s")
+                logger.info(
+                    f"{command_type} command succeeded in {execution_time:.2f}s"
+                )
             else:
-                logger.warning(f"{command_type} command failed with exit code {result.exit_code}")
+                logger.warning(
+                    f"{command_type} command failed with exit code {result.exit_code}"
+                )
                 if result.stderr:
                     logger.error(f"Command stderr: {result.stderr}")
 
@@ -127,18 +136,20 @@ class Action:
                 stdout=result.stdout,
                 stderr=result.stderr,
                 exit_code=result.exit_code,
-                execution_time=execution_time
+                execution_time=execution_time,
             )
 
         except TimeoutError:
             execution_time = time.time() - start_time
-            logger.error(f"{command_type} command timed out after {execution_time:.2f}s")
+            logger.error(
+                f"{command_type} command timed out after {execution_time:.2f}s"
+            )
             return CommandResult(
                 success=False,
                 stdout="",
                 stderr=f"Command timed out after {self.timeout}s",
                 exit_code=124,
-                execution_time=execution_time
+                execution_time=execution_time,
             )
         except Exception as e:
             execution_time = time.time() - start_time
@@ -148,7 +159,7 @@ class Action:
                 stdout="",
                 stderr=str(e),
                 exit_code=1,
-                execution_time=execution_time
+                execution_time=execution_time,
             )
 
     def validate(self) -> bool:

@@ -21,10 +21,9 @@ UNIT_TEST_DIR="${TEST_DIR}/unit"
 INT_TEST_DIR="${TEST_DIR}/integration"
 VENV_DIR=".venv"
 TEMP_FILE='.bw_out.temp'
-PYLINT_CONF_FILE="${CONF_DIR}/setup.pylint.conf"
-FLAKE8_CONF_FILE="${CONF_DIR}/setup.flake8.conf"
-MYPY_CONF_FILE="${CONF_DIR}/setup.mypy.conf"
-PARENT_DIR=$(basename $(dirname `realpath ./module.py`))
+PYLINT_CONF_FILE="${CONF_DIR}/pylint.conf"
+FLAKE8_CONF_FILE="${CONF_DIR}/flake8.conf"
+MYPY_CONF_FILE="${CONF_DIR}/mypy.conf"
 BUILD_DIRS=(
     '_build/' "${DISTRIBUTION_DIR}" "${PACKAGE_NAME}.egg-info/"
 )
@@ -35,6 +34,7 @@ MODE='BUILD' # (SETUP | TEST | CHECK | BUILD)
 BUILD='on'
 INSTALL='off'
 PUBLISH='off'
+DEVELOPMENT='off'
 YES='off'
 
 
@@ -133,9 +133,11 @@ function setup_project() {
             echo "[ WARNING ]: Could not create Python3 Virtual Environment in (${VENV_DIR})!"
         fi
     fi
-    echo "[ ... ]: Activating Python virtual environment"
-    if ! source ${VENV_DIR}/bin/activate; then
-        echo "[ WARNING ]: Could not activate Python3 Virtual Environment!"
+    if [[ "${DEVELOPMENT}" == 'on' ]]; then
+        echo "[ ... ]: Activating Python virtual environment"
+        if ! source ${VENV_DIR}/bin/activate; then
+            echo "[ WARNING ]: Could not activate Python3 Virtual Environment!"
+        fi
     fi
     echo "[ ... ]: Python requirements"
     if [ -d "${VENV_DIR}" ]; then
@@ -209,17 +211,28 @@ function check_source_code() {
     echo "[ CHECKING ]: Rick's Python3 source code..."
     local FAILURES=0
     echo "[ ... ]: Running mypy..."
-    mypy --disallow-untyped-defs --config-file ${MYPY_CONF_FILE} *.py
+    mypy --disallow-untyped-defs --config-file ${MYPY_CONF_FILE} ${PACKAGE_NAME}
     if [ $? -ne 0 ]; then
         local FAILURES=$((FAILURES + 1))
     fi
     echo "[ ... ]: Running flake8..."
-    flake8 --config ${FLAKE8_CONF_FILE} .
+    flake8 --config ${FLAKE8_CONF_FILE} ${PACKAGE_NAME}
     if [ $? -ne 0 ]; then
         local FAILURES=$((FAILURES + 1))
     fi
     echo "[ ... ]: Running pylint..."
-    pylint --rcfile=${PYLINT_CONF_FILE} ${PARENT_DIR}
+    pylint --rcfile=${PYLINT_CONF_FILE} ${PACKAGE_NAME}
+    if [ $? -ne 0 ]; then
+        local FAILURES=$((FAILURES + 1))
+    fi
+    return $FAILURES
+}
+
+function format_source_code() {
+    echo "[ FORMATTING ]: Rick's Python3 source code..."
+    local FAILURES=0
+    echo "[ ... ]: Running black..."
+    black ${PACKAGE_NAME}
     if [ $? -ne 0 ]; then
         local FAILURES=$((FAILURES + 1))
     fi
@@ -279,6 +292,9 @@ for opt in ${@}; do
         -y|--yes)
             YES='on'
             ;;
+        -d|--development)
+            DEVELOPMENT='on'
+            ;;
     esac
 done
 
@@ -301,6 +317,11 @@ for opt in ${@}; do
         -c|--check)
             MODE='CHECK'
             check_source_code
+            EXIT_CODE=$((EXIT_CODE + $?))
+            ;;
+        -f|--format)
+            MODE='FORMAT'
+            format_source_code
             EXIT_CODE=$((EXIT_CODE + $?))
             ;;
         -C|--cleanup)
@@ -331,4 +352,5 @@ fi
 exit $EXIT_CODE
 
 # CODE DUMP
+#PARENT_DIR=$(basename $(dirname `realpath ./module.py`))
 

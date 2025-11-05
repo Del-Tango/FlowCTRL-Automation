@@ -19,7 +19,7 @@ class TestShellExecutor:
         """Test successful command execution"""
         executor = ShellExecutor()
 
-        with patch('subprocess.Popen') as mock_popen:
+        with patch("subprocess.Popen") as mock_popen:
             mock_process = Mock()
             mock_process.communicate.return_value = ("test stdout", "")
             mock_process.returncode = 0
@@ -35,7 +35,7 @@ class TestShellExecutor:
         """Test command execution with timeout"""
         executor = ShellExecutor()
 
-        with patch('threading.Thread') as mock_thread:
+        with patch("threading.Thread") as mock_thread:
             result = executor.execute_with_timeout("echo 'test'", timeout=5)
             assert result.exit_code in [0, 124]  # Could be success or timeout
 
@@ -43,7 +43,7 @@ class TestShellExecutor:
         """Test command existence check"""
         executor = ShellExecutor()
 
-        with patch('subprocess.run') as mock_run:
+        with patch("subprocess.run") as mock_run:
             mock_run.return_value.returncode = 0
             assert executor.check_command_exists("ls") is True
 
@@ -91,8 +91,8 @@ class TestStateManager:
         manager.update_state(2, "test_stage")
 
         full_state = manager.get_full_state()
-        assert full_state['active'] is True
-        assert full_state['action'] == "started"
+        assert full_state["active"] is True
+        assert full_state["action"] == "started"
 
     def test_purge(self, temp_dir):
         """Test state purging"""
@@ -113,23 +113,29 @@ class TestConsoleOutput:
         """Test info message output"""
         ConsoleOutput.info("Test info message")
         captured = capsys.readouterr()
-        assert "[INFO]: Test info message" in captured.out
+        assert "[ INFO ]: Test info message" in captured.out
 
     def test_success_message(self, capsys):
         """Test success message output"""
-        ConsoleOutput.success("Test success message")
+        ConsoleOutput.ok("Test success message")
         captured = capsys.readouterr()
-        assert "[OK]: Test success message" in captured.out
+        assert "[ OK ]: Test success message" in captured.out
+
+    def test_failure_message(self, capsys):
+        """Test success message output"""
+        ConsoleOutput.nok("Test failure message")
+        captured = capsys.readouterr()
+        assert "[ NOK ]: Test failure message" in captured.out
 
     def test_error_message(self, capsys):
         """Test error message output"""
         ConsoleOutput.error("Test error message")
         captured = capsys.readouterr()
-        assert "[ERROR]: Test error message" in captured.out
+        assert "[ ERROR ]: Test error message" in captured.out
 
     def test_banner_message(self, capsys):
         """Test banner message output"""
         ConsoleOutput.banner("Test Banner")
         captured = capsys.readouterr()
         assert "Test Banner" in captured.out
-#       assert "=" * 60 in captured.out
+

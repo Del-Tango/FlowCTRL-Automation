@@ -9,19 +9,15 @@ SIMPLE_SKETCH = {
             "name": "action_1",
             "cmd": "echo 'Hello World'",
             "time": "5s",
-            "timeout": "10s"
+            "timeout": "10s",
         }
-    ]
+    ],
 }
 
 MULTI_STAGE_SKETCH = {
     "name": "Multi-Stage Test",
     "setup_stage": [
-        {
-            "name": "create_dir",
-            "cmd": "mkdir -p /tmp/test_dir",
-            "time": "5s"
-        }
+        {"name": "create_dir", "cmd": "mkdir -p /tmp/test_dir", "time": "5s"}
     ],
     "main_stage": [
         {
@@ -29,16 +25,12 @@ MULTI_STAGE_SKETCH = {
             "cmd": "ls -la /tmp/test_dir",
             "time": "5s",
             "setup-cmd": "echo 'Starting file listing'",
-            "teardown-cmd": "echo 'File listing complete'"
+            "teardown-cmd": "echo 'File listing complete'",
         }
     ],
     "cleanup_stage": [
-        {
-            "name": "remove_dir",
-            "cmd": "rm -rf /tmp/test_dir",
-            "time": "5s"
-        }
-    ]
+        {"name": "remove_dir", "cmd": "rm -rf /tmp/test_dir", "time": "5s"}
+    ],
 }
 
 INVALID_SKETCH = {
@@ -46,7 +38,7 @@ INVALID_SKETCH = {
         {
             "name": "invalid_action",
             # Missing required 'cmd' field
-            "time": "invalid_time_format"
+            "time": "invalid_time_format",
         }
     ]
 }

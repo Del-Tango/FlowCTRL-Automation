@@ -2,6 +2,7 @@
 Procedure representation and execution logic
 """
 
+import os
 import logging
 import pysnooper
 
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ProcedureStats:
     """Procedure execution statistics"""
+
     total_stages: int
     completed_stages: int
     total_actions: int
@@ -28,10 +30,10 @@ class ProcedureStats:
 class Procedure:
     """Represents a complete automation procedure"""
 
-    def __init__(self, data: Dict[str, Any], config):
+    def __init__(self, data: Dict[str, Any], config, sketch_file=None):
         self.data = data
         self.config = config
-        self.name = data.get('name', 'Unnamed Procedure')
+        self.name = data.get("name", 'Unamed procedure' if not sketch_file else os.path.basename(sketch_file))
         self.stages: List[Stage] = []
         # FIX: Remove non-existent handler
         # self.handler = ProcedureHandler(config)
@@ -43,7 +45,7 @@ class Procedure:
     def _parse_stages(self):
         """Parse stages from procedure data"""
         for stage_name, actions_data in self.data.items():
-            if stage_name == 'name':
+            if stage_name == "name":
                 continue
 
             stage = Stage(stage_name, actions_data, self.config)
@@ -51,8 +53,7 @@ class Procedure:
             self.stats.total_stages += 1
             self.stats.total_actions += len(actions_data)
 
-
-    @pysnooper.snoop()
+    # @pysnooper.snoop()
     def execute(self) -> bool:
         """Execute the complete procedure"""
         logger.info(f"Executing procedure: {self.name}")
@@ -71,7 +72,9 @@ class Procedure:
                     self.stats.failure_count += 1
                     # Check if we should continue on failure
                     if not self._should_continue_on_failure():
-                        logger.error(f"Stage failed, terminating procedure: {stage.name}")
+                        logger.error(
+                            f"Stage failed, terminating procedure: {stage.name}"
+                        )
                         return False
 
             # Final cleanup
@@ -85,11 +88,13 @@ class Procedure:
             logger.error(f"Procedure execution error: {e}")
             return False
 
+    # TODO
     def _should_continue_on_failure(self) -> bool:
         """Determine if procedure should continue after failure"""
         # Implementation would check procedure-level configuration
         return True
 
+    # TODO
     def _cleanup(self):
         """Cleanup after procedure execution"""
         # Implementation would handle post-execution cleanup
@@ -98,14 +103,16 @@ class Procedure:
     def get_progress(self) -> Dict[str, Any]:
         """Get current execution progress"""
         return {
-            'name': self.name,
-            'current_stage': self.state_manager.get_state_field(2) if self.state_manager.get_state() else None,
-            'stats': {
-                'total_stages': self.stats.total_stages,
-                'completed_stages': self.stats.completed_stages,
-                'total_actions': self.stats.total_actions,
-                'completed_actions': self.stats.completed_actions,
-                'success_count': self.stats.success_count,
-                'failure_count': self.stats.failure_count
-            }
+            "name": self.name,
+            "current_stage": self.state_manager.get_state_field(2)
+            if self.state_manager.get_state()
+            else None,
+            "stats": {
+                "total_stages": self.stats.total_stages,
+                "completed_stages": self.stats.completed_stages,
+                "total_actions": self.stats.total_actions,
+                "completed_actions": self.stats.completed_actions,
+                "success_count": self.stats.success_count,
+                "failure_count": self.stats.failure_count,
+            },
         }

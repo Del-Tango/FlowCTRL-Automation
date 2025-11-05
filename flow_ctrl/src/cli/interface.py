@@ -57,31 +57,45 @@ class FlowCLI:
 }"""
         )
 
-        parser.add_argument('--sketch-file', '-f', type=str,
-                          help='Path to JSON sketch file containing procedure')
-        parser.add_argument('--config-file', '-c', type=str,
-                          help='Path to configuration file')
-        parser.add_argument('--log-file', '-l', type=str,
-                          help='Path to log file')
+        parser.add_argument(
+            "--sketch-file",
+            "-f",
+            type=str,
+            help="Path to JSON sketch file containing procedure",
+        )
+        parser.add_argument(
+            "--config-file", "-c", type=str, help="Path to configuration file"
+        )
+        parser.add_argument("--log-file", "-l", type=str, help="Path to log file")
 
         # Action arguments
-        action_group = parser.add_argument_group('Actions')
-        action_group.add_argument('--start', '-S', action='store_true',
-                                help='Start automation process')
-        action_group.add_argument('--stop', '-s', action='store_true',
-                                help='Stop currently running process')
-        action_group.add_argument('--pause', '-p', action='store_true',
-                                help='Pause currently running process')
-        action_group.add_argument('--resume', '-R', action='store_true',
-                                help='Resume paused process')
-        action_group.add_argument('--purge', '-P', action='store_true',
-                                help='Purge all data and cleanup files')
+        action_group = parser.add_argument_group("Actions")
+        action_group.add_argument(
+            "--start", "-S", action="store_true", help="Start automation process"
+        )
+        action_group.add_argument(
+            "--stop", "-s", action="store_true", help="Stop currently running process"
+        )
+        action_group.add_argument(
+            "--pause", "-p", action="store_true", help="Pause currently running process"
+        )
+        action_group.add_argument(
+            "--resume", "-R", action="store_true", help="Resume paused process"
+        )
+        action_group.add_argument(
+            "--purge",
+            "-P",
+            action="store_true",
+            help="Purge all data and cleanup files",
+        )
 
         # Other options
-        parser.add_argument('--silence', action='store_true',
-                          help='Suppress banner and non-essential output')
-        parser.add_argument('--debug', action='store_true',
-                          help='Enable debug logging')
+        parser.add_argument(
+            "--silence",
+            action="store_true",
+            help="Suppress banner and non-essential output",
+        )
+        parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
         return parser.parse_args()
 
@@ -152,7 +166,9 @@ class FlowCLI:
             else:
                 # No action specified, show help
                 if not args.silence:
-                    ConsoleOutput.info("No action specified. Use --help for usage information.")
+                    ConsoleOutput.info(
+                        "No action specified. Use --help for usage information."
+                    )
 
         except KeyboardInterrupt:
             ConsoleOutput.info("Operation interrupted by user")
@@ -178,10 +194,12 @@ class FlowCLI:
         banner = self._cli_banner()
         ConsoleOutput.banner(banner)
 
+
 def main():
     """Main entry point"""
     cli = FlowCLI()
     cli.run()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

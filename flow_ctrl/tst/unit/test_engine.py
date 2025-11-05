@@ -52,7 +52,7 @@ class TestFlowEngine:
 
         assert result is False
 
-    @patch('flow_ctrl.src.core.engine.Procedure')
+    @patch("flow_ctrl.src.core.engine.Procedure")
     def test_start_procedure_success(self, mock_procedure_class, test_config, temp_dir):
         """Test successful procedure start"""
         sketch_file = temp_dir / "test_sketch.json"

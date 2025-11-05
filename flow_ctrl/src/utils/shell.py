@@ -9,12 +9,14 @@ import logging
 
 from typing import NamedTuple, List, Optional
 from dataclasses import dataclass
+from ..utils.logger import ConsoleOutput
 
 logger = logging.getLogger(__name__)
 
 
 class CommandResult(NamedTuple):
     """Result of command execution"""
+
     stdout: str
     stderr: str
     exit_code: int
@@ -23,6 +25,7 @@ class CommandResult(NamedTuple):
 @dataclass
 class TimeoutResult:
     """Result for timed-out command"""
+
     stdout: str = ""
     stderr: str = "Command timed out"
     exit_code: int = 124
@@ -44,17 +47,22 @@ class ShellExecutor:
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
             )
 
             stdout, stderr = process.communicate()
             exit_code = process.returncode
 
             # Remove trailing newlines
-            stdout = stdout.rstrip('\n')
-            stderr = stderr.rstrip('\n')
+            stdout = stdout.rstrip("\n")
+            stderr = stderr.rstrip("\n")
 
-            logger.debug(f"Command result - Exit: {exit_code}, Stdout: {stdout[:100]}, Stderr: {stderr[:100]}")
+            if exit_code != 0:
+                ConsoleOutput.nok(stderr)
+
+            logger.debug(
+                f"Command result - Exit: {exit_code}, Stdout: {stdout[:100]}, Stderr: {stderr[:100]}"
+            )
 
             return CommandResult(stdout, stderr, exit_code)
 
@@ -62,7 +70,9 @@ class ShellExecutor:
             logger.error(f"Command execution error: {e}")
             return CommandResult("", str(e), 1)
 
-    def execute_with_timeout(self, command: str, timeout: int, user: Optional[str] = None) -> CommandResult:
+    def execute_with_timeout(
+        self, command: str, timeout: int, user: Optional[str] = None
+    ) -> CommandResult:
         """Execute command with timeout"""
         result_container = []
         stop_event = threading.Event()
@@ -91,7 +101,11 @@ class ShellExecutor:
             return TimeoutResult()
         else:
             # Command completed
-            return result_container[0] if result_container else CommandResult("", "Unknown error", 1)
+            return (
+                result_container[0]
+                if result_container
+                else CommandResult("", "Unknown error", 1)
+            )
 
     def execute_detached(self, command: str, user: Optional[str] = None) -> int:
         """Execute command in detached mode (non-blocking)"""
@@ -106,7 +120,7 @@ class ShellExecutor:
                 detached_command,
                 shell=True,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
             )
 
             process.wait()
@@ -120,10 +134,7 @@ class ShellExecutor:
         """Check if a command exists in system PATH"""
         try:
             result = subprocess.run(
-                ['which', command],
-                capture_output=True,
-                text=True,
-                check=False
+                ["which", command], capture_output=True, text=True, check=False
             )
             return result.returncode == 0
         except Exception:

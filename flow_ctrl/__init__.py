@@ -19,14 +19,15 @@ from .src.config.settings import DEFAULT_CONFIG
 
 # Public API
 __all__ = [
-    'FlowEngine',
-    'Procedure',
-    'Stage',
-    'Action',
-    'FlowCLI',
-    'ConsoleOutput',
-    'DEFAULT_CONFIG'
+    "FlowEngine",
+    "Procedure",
+    "Stage",
+    "Action",
+    "FlowCLI",
+    "ConsoleOutput",
+    "DEFAULT_CONFIG",
 ]
+
 
 def get_version():
     """Get the current version of Flow-CTRL"""

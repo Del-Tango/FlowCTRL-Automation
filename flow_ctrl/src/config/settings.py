@@ -8,9 +8,11 @@ from pathlib import Path
 from typing import Dict, Any, List
 from dataclasses import dataclass
 
+
 @dataclass
 class FlowConfig:
     """Main configuration class"""
+
     project_dir: str
     log_dir: str = "logs"
     conf_dir: str = "conf"
@@ -20,8 +22,9 @@ class FlowConfig:
     log_name: str = "FlowCTRL"
     silence: bool = False
     debug: bool = False
-    log_format: str = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    timestamp_format: str = '%H:%M:%S'
+    log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    timestamp_format: str = "%H:%M:%S"
+
 
 BASE_DIR = Path(__file__).parent.parent.parent
 DEFAULT_CONFIG = FlowConfig(
@@ -33,16 +36,10 @@ DEFAULT_CONFIG = FlowConfig(
     log_file="flow-ctrl.log",
     log_name="FlowCTRL",
     silence=False,
-    debug=False
+    debug=False,
 )
 
 # Time conversion multipliers
-TIME_MULTIPLIERS = {
-    's': 1,
-    'm': 60,
-    'h': 3600,
-    'd': 86400
-}
+TIME_MULTIPLIERS = {"s": 1, "m": 60, "h": 3600, "d": 86400}
 
 # CODE DUMP
-

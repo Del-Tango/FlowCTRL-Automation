@@ -28,7 +28,7 @@ class TestStage:
         stage_name = "test_stage"
         actions_data = [
             {"name": "action_1", "cmd": "echo 'action1'"},
-            {"name": "action_2", "cmd": "echo 'action2'"}
+            {"name": "action_2", "cmd": "echo 'action2'"},
         ]
 
         stage = Stage(stage_name, actions_data, test_config)
@@ -37,7 +37,7 @@ class TestStage:
         assert stage.actions[0].name == "action_1"
         assert stage.actions[1].name == "action_2"
 
-    @patch('flow_ctrl.src.core.stage.Action')
+    @patch("flow_ctrl.src.core.stage.Action")
     def test_execute_success(self, mock_action_class, test_config):
         """Test successful stage execution"""
         mock_action = Mock()
@@ -56,7 +56,7 @@ class TestStage:
         assert stage.stats.success_count == 1
         assert stage.stats.completed_actions == 1
 
-    @patch('flow_ctrl.src.core.stage.Action')
+    @patch("flow_ctrl.src.core.stage.Action")
     def test_execute_with_failure(self, mock_action_class, test_config):
         """Test stage execution with action failure"""
         mock_action = Mock()
@@ -82,6 +82,6 @@ class TestStage:
         stage = Stage(stage_name, actions_data, test_config)
         progress = stage.get_progress()
 
-        assert progress['name'] == "test_stage"
-        assert progress['stats']['total_actions'] == 1
-        assert progress['stats']['completed_actions'] == 0
+        assert progress["name"] == "test_stage"
+        assert progress["stats"]["total_actions"] == 1
+        assert progress["stats"]["completed_actions"] == 0

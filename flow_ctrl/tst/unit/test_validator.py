@@ -53,20 +53,20 @@ class TestValidator:
             "name": "test_action",
             "cmd": "echo 'test'",
             "time": "5s",
-            "timeout": "10s"
+            "timeout": "10s",
         }
 
-        invalid_action_missing_name = {
-            "cmd": "echo 'test'"
-        }
+        invalid_action_missing_name = {"cmd": "echo 'test'"}
 
-        invalid_action_missing_cmd = {
-            "name": "test_action"
-        }
+        invalid_action_missing_cmd = {"name": "test_action"}
 
         assert self.validator.validate_action_config(valid_action) is True
-        assert self.validator.validate_action_config(invalid_action_missing_name) is False
-        assert self.validator.validate_action_config(invalid_action_missing_cmd) is False
+        assert (
+            self.validator.validate_action_config(invalid_action_missing_name) is False
+        )
+        assert (
+            self.validator.validate_action_config(invalid_action_missing_cmd) is False
+        )
 
     def test_validate_time_format(self):
         """Test time format validation"""
