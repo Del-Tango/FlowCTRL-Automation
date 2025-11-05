@@ -1,0 +1,8 @@
+# Flow-CTRL Automation Framework Requirements
+# Core dependencies
+setuptools>=45.0
+PyYAML>=5.4.0
+
+# Standard library backports (if needed for older Python versions)
+typing-extensions>=4.0.0; python_version < '3.8'
+dataclasses>=0.6; python_version < '3.7'
